@@ -1,8 +1,6 @@
-import { useState } from 'react'
 import { StoreProvider } from './store'
 import { Shell } from './sim/Shell'
 import { MobileShell } from './sim/MobileShell'
-import { Splash } from './app/Splash'
 
 const capacitorNative =
   typeof window !== 'undefined' && Boolean((window as any).Capacitor?.isNativePlatform?.())
@@ -15,14 +13,8 @@ const mobileMode = capacitorNative || deviceParam
 const browserPreview = deviceParam && !capacitorNative
 
 export default function App() {
-  // 앱 진입 로딩 화면 — 세션당 1회, ⚙ 패널에서 다시 볼 수 있다
-  const [splash, setSplash] = useState(true)
-  const inner = (
-    <>
-      {mobileMode ? <MobileShell /> : <Shell />}
-      {splash && <Splash onDone={() => setSplash(false)} />}
-    </>
-  )
+  // 로딩 화면은 WorkerPhone 안에서 렌더링된다 — 폰 프레임 밖으로 나가지 않도록
+  const inner = mobileMode ? <MobileShell /> : <Shell />
   if (browserPreview) {
     return (
       <StoreProvider>

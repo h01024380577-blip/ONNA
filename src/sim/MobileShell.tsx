@@ -3,7 +3,6 @@ import { useStore } from '../store'
 import { PERSONAS } from '../mock/personas'
 import { WorkerPhone } from '../app/Phone'
 import { Icon } from '../app/Icon'
-import { Splash } from '../app/Splash'
 import { FamilyPhone } from '../web/FamilyPhone'
 import { EmployerCard, OpsCard } from '../web/Desk'
 import { useSimTimers } from './useSimTimers'
@@ -23,7 +22,6 @@ const SCENARIOS: Array<{ id: Scenario; label: string }> = [
 export function MobileShell() {
   const { state, dispatch } = useStore()
   useSimTimers()
-  const [replaySplash, setReplaySplash] = useState(false)
   const [view, setView] = useState<View>('worker')
   const [open, setOpen] = useState(false)
   const [idFailMode, setIdFailMode] = useState(false)
@@ -45,8 +43,6 @@ export function MobileShell() {
 
       <button className="fab" onClick={() => setOpen(true)} aria-label="데모 패널"><Icon name="gear" size={20} strokeWidth={2} /></button>
 
-      {replaySplash && <Splash onDone={() => setReplaySplash(false)} />}
-
       {open && (
         <div className="devSheetBack" onClick={() => setOpen(false)}>
           <div className="devSheet" onClick={(e) => e.stopPropagation()}>
@@ -55,7 +51,8 @@ export function MobileShell() {
             <button className="devBtn"
               onClick={pick(() => {
                 dispatch({ type: 'RESET', persona: state.personaId, startAt: 'onboarding' })
-                setView('worker'); setOpen(false); setReplaySplash(true)
+                setView('worker'); setOpen(false)
+                window.dispatchEvent(new CustomEvent('onna:splash'))
               })}>
               <Icon name="restart" size={17} strokeWidth={2.1} style={{ marginRight: 8 }} />첫 온보딩 화면으로 (A0 국적 선택)
             </button>

@@ -109,7 +109,11 @@ export function Shell() {
               onClick={() => dispatch({ type: 'TX_ARRIVED' })}>
               도착 웹훅 지금 발생 (기본 {ARRIVE_DEMO_SEC}초 뒤)
             </button>
-            <button className="devBtn subtle" onClick={() => dispatch({ type: 'RESET', persona: state.personaId, startAt })}>
+            <button className="devBtn subtle" onClick={() => {
+              dispatch({ type: 'RESET', persona: state.personaId, startAt })
+              // 실제 앱 재실행처럼 폰 안에서 로딩 화면부터 다시
+              window.dispatchEvent(new CustomEvent('onna:splash'))
+            }}>
               ⟲ 세션 초기화
             </button>
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useApp } from './hooks'
 import { Icon } from './Icon'
 import { Logo } from './Logo'
+import { Splash } from './Splash'
 import { A0, A1, A2, A3, A4, A5, A6 } from './screens/Onboarding'
 import { B0, B1, B2, B3, B4, B5, B7 } from './screens/Remit'
 import { C1, Help } from './screens/Record'
@@ -49,6 +50,8 @@ type ChatMsg = {
 export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boolean; frameless?: boolean }) {
   const { state, dispatch, p, t, krw, local } = useApp()
   const fx = FX[p.currency]
+  // 앱 진입 로딩 화면 — 폰 화면 안에서만 표시. 'onna:splash' 이벤트로 재생
+  const [splash, setSplash] = useState(true)
   const [chatOpen, setChatOpen] = useState(false)
   const [msgs, setMsgs] = useState<ChatMsg[]>([])
   const [typing, setTyping] = useState(false)
@@ -57,8 +60,13 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
 
   useEffect(() => {
     const open = () => setChatOpen(true)
+    const replay = () => setSplash(true)
     window.addEventListener('onna:chat', open)
-    return () => window.removeEventListener('onna:chat', open)
+    window.addEventListener('onna:splash', replay)
+    return () => {
+      window.removeEventListener('onna:chat', open)
+      window.removeEventListener('onna:splash', replay)
+    }
   }, [])
 
   useEffect(() => {
@@ -195,6 +203,8 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
             </div>
           </div>
         )}
+
+        {splash && <Splash onDone={() => setSplash(false)} />}
       </div>
   )
 

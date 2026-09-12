@@ -628,14 +628,14 @@ button.item:active { background: var(--app-primary-tint); }
 }
 .keypad button:active { background: var(--app-primary-tint); }
 /* ---------- iM뱅크 × ONNA 로딩(스플래시) ---------- */
+/* 폰 화면(.screen) 안에서만 표시 — 웹 페이지 전체를 덮지 않는다 */
 .splash {
-  position: fixed; inset: 0; z-index: 200;
+  position: absolute; inset: 0; z-index: 200;
   background: #01c6ab; color: #fff;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 46px; transition: opacity .4s ease;
 }
 .splash.out { opacity: 0; }
-.browserDevice .splash { position: absolute; border-radius: 46px; }
 .splashLock {
   display: flex; align-items: center; justify-content: center;
   gap: 13px; max-width: 100%; padding: 0 18px; box-sizing: border-box;

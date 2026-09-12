@@ -4,7 +4,7 @@ export type IconName =
   | 'send' | 'record' | 'help' | 'home' | 'search' | 'qr' | 'mic'
   | 'check' | 'alert' | 'person' | 'refresh' | 'doc' | 'phone' | 'shield'
   | 'chat' | 'money' | 'chevron' | 'gear' | 'restart' | 'back' | 'backspace'
-  | 'camera' | 'finger' | 'copy' | 'bell' | 'close' | 'sparkle'
+  | 'camera' | 'finger' | 'copy' | 'bell' | 'close' | 'sparkle' | 'scan' | 'flash'
 
 /** 얇은 stroke 라인 아이콘 세트 — currentColor 상속, placeholder 텍스트/이모지 대체 */
 export function Icon({ name, size = 22, strokeWidth = 1.9, style }: { name: IconName; size?: number; strokeWidth?: number; style?: CSSProperties }) {
@@ -63,6 +63,16 @@ export function Icon({ name, size = 22, strokeWidth = 1.9, style }: { name: Icon
       return <svg {...p}><path d="M6 9.6a6 6 0 0 1 12 0c0 4 1.1 5.4 1.9 6.2H4.1C4.9 15 6 13.6 6 9.6Z" /><path d="M10 19.2a2.2 2.2 0 0 0 4 0" /></svg>
     case 'close':
       return <svg {...p} strokeWidth={2.2}><path d="m6 6 12 12M18 6 6 18" /></svg>
+    case 'scan':
+      // 스캔 뷰파인더 — 4개 모서리 브래킷 + 중앙 QR 힌트
+      return (
+        <svg {...p} strokeWidth={2}>
+          <path d="M3 8V5.5A2.5 2.5 0 0 1 5.5 3H8M16 3h2.5A2.5 2.5 0 0 1 21 5.5V8M21 16v2.5a2.5 2.5 0 0 1-2.5 2.5H16M8 21H5.5A2.5 2.5 0 0 1 3 18.5V16" />
+          <rect x="8.5" y="8.5" width="7" height="7" rx="1.2" strokeWidth={1.6} />
+        </svg>
+      )
+    case 'flash':
+      return <svg {...p}><path d="M13 2 5 13h6l-1 9 8-11h-6l1-9Z" /></svg>
     case 'sparkle':
       // AI 어시스턴트 — 4점 별(큰 것 + 작은 것)
       return (

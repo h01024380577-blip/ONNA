@@ -525,6 +525,59 @@ button.item:active { background: var(--app-primary-tint); }
 .tile svg { color: var(--app-primary); }
 .tile.on { border-color: var(--app-primary); background: var(--app-primary-tint); }
 
+/* A4-1 회사 QR 스캔 뷰파인더 */
+.scanView {
+  position: relative; width: 100%; height: 300px; margin: 4px 0 14px;
+  background: #141b1f; border: 0; border-radius: 18px; overflow: hidden;
+  display: block; padding: 0; font-family: inherit;
+}
+.scanView .scanFrame {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%);
+  width: 176px; height: 176px; border-radius: 12px;
+  --bk: var(--app-primary);
+  background:
+    linear-gradient(var(--bk) 0 0) top left / 30px 3px,
+    linear-gradient(var(--bk) 0 0) top left / 3px 30px,
+    linear-gradient(var(--bk) 0 0) top right / 30px 3px,
+    linear-gradient(var(--bk) 0 0) top right / 3px 30px,
+    linear-gradient(var(--bk) 0 0) bottom left / 30px 3px,
+    linear-gradient(var(--bk) 0 0) bottom left / 3px 30px,
+    linear-gradient(var(--bk) 0 0) bottom right / 30px 3px,
+    linear-gradient(var(--bk) 0 0) bottom right / 3px 30px;
+  background-repeat: no-repeat;
+}
+.scanView .scanQr {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -52%);
+  border-radius: 6px; overflow: hidden; animation: cardIn .7s cubic-bezier(.2,.9,.35,1);
+}
+.scanView .scanline {
+  position: absolute; left: 50%; transform: translateX(-50%); width: 176px; height: 2px;
+  background: var(--app-primary); box-shadow: 0 0 12px var(--app-primary);
+  top: 76px; animation: scan 1.6s ease-in-out infinite;
+}
+.scanView .scanChip {
+  position: absolute; top: 12px; left: 12px; display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.14); color: #dbe6e2; border-radius: 999px;
+  padding: 5px 11px; font-size: 11.5px; font-weight: 600;
+}
+.scanView .scanChip i { width: 6px; height: 6px; border-radius: 50%; background: #8fa1a8; }
+.scanView .scanChip i.live { background: var(--app-primary); animation: blink 1s infinite; }
+.scanView .scanFlash {
+  position: absolute; top: 10px; right: 12px; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,.14); color: #dbe6e2;
+  display: flex; align-items: center; justify-content: center;
+}
+.scanView .scanGuide {
+  position: absolute; left: 0; right: 0; bottom: 16px; text-align: center;
+  color: #9aa8ae; font-size: 12.5px; padding: 0 20px;
+}
+
+/* 카드 안 인라인 텍스트 링크 */
+.linkBtn {
+  margin-top: 10px; padding: 0; border: 0; background: none; font-family: inherit;
+  color: var(--app-primary); font-size: 13.5px; font-weight: 600; text-decoration: underline;
+}
+
 /* B2 수취인 카드 */
 .recipCard {
   display: flex; align-items: center; gap: 12px; background: var(--app-card);

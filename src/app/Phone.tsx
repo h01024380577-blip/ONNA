@@ -3,7 +3,7 @@ import { useApp } from './hooks'
 import { Icon } from './Icon'
 import { Logo } from './Logo'
 import { Splash } from './Splash'
-import { A0, A1, A2, A3, A4, A5, A6 } from './screens/Onboarding'
+import { A0, A1, A2, A3, A4, A41, A42, A5, A6 } from './screens/Onboarding'
 import { B0, B1, B2, B3, B4, B5, B7 } from './screens/Remit'
 import { C1, Help } from './screens/Record'
 import { D1, D2, D3 } from './screens/Loan'
@@ -15,7 +15,9 @@ import type { Screen } from '../types'
 const TOP_NAV: Partial<Record<Screen, { back?: Screen; home?: boolean; title?: string }>> = {
   A1: { back: 'A0' },
   A2: { back: 'A1', title: 'prog.identity' }, A3: { back: 'A2', title: 'prog.identity' },
-  A4: { back: 'A3', title: 'prog.company' }, A5: { back: 'A4', title: 'prog.record' },
+  A4: { back: 'A3', title: 'prog.company' },
+  A41: { back: 'A4', title: 'prog.company' }, A42: { back: 'A4', title: 'prog.company' },
+  A5: { back: 'A4', title: 'prog.record' },
   B2: { back: 'B1', title: 'b1.navSend' }, B3: { back: 'B2', home: true, title: 'b1.navSend' },
   B4: { home: true, title: 'b3.check' }, B7: { back: 'B5', home: true, title: 'b5.makeRule' },
   D1: { back: 'C1', home: true, title: 'd.open' },
@@ -152,6 +154,8 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
         {s === 'A2' && <A2 idFailMode={idFailMode} />}
         {s === 'A3' && <A3 />}
         {s === 'A4' && <A4 />}
+        {s === 'A41' && <A41 />}
+        {s === 'A42' && <A42 />}
         {s === 'A5' && <A5 />}
         {s === 'A6' && <A6 />}
         {s === 'B0' && <B0 />}

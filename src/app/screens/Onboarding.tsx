@@ -173,34 +173,27 @@ export function A3() {
 /* A4 고용주 연결 — ON-4: 건너뛰어도 계좌 개설 진행. QR=페르소나 사업장, 검색=대구 사업장 디렉터리 */
 export function A4() {
   const { state, dispatch, p, t } = useApp()
-  const linked = state.onboarding.employer !== 'none'
-  const [method, setMethod] = useState<'qr' | 'search' | null>(null)
+  const [search, setSearch] = useState(false)
   const [q, setQ] = useState('')
   const results = searchCompanies(q)
   return (
     <>
       <div className="appBody">
-        <div className="prog"><span>{t('prog.company')}</span><span>3 / 4</span></div>
-        <div className="bar"><i style={{ width: '75%' }} /></div>
+        <CompanyStep t={t} />
         <div className="h1">{t('a4.title')}</div>
         <p className="lead">{t('a4.lead')}</p>
-        {!linked && (
-          <div className="tileRow">
-            <button className={`tile ${method === 'qr' ? 'on' : ''}`} onClick={() => setMethod('qr')}>
-              <Icon name="qr" size={24} />{t('a4.qr')}
-            </button>
-            <button className={`tile ${method === 'search' ? 'on' : ''}`} onClick={() => setMethod('search')}>
-              <Icon name="search" size={24} />{t('a4.search')}
-            </button>
-          </div>
-        )}
-        {method === 'qr' && !linked && (
-          <div className="card center">
-            <div className="qr"><Qr seed={p.employerKo} /></div>
-            <p style={{ fontSize: 13, marginBottom: 8 }}>{p.employerKo}</p>
-          </div>
-        )}
-        {method === 'search' && !linked && (
+
+        <div className="tileRow">
+          {/* QR은 전용 스캔 화면(A4-1)으로 이동 */}
+          <button className="tile" onClick={() => dispatch({ type: 'NAV', screen: 'A41' })}>
+            <Icon name="scan" size={24} />{t('a4.qr')}
+          </button>
+          <button className={`tile ${search ? 'on' : ''}`} onClick={() => setSearch(true)}>
+            <Icon name="search" size={24} />{t('a4.search')}
+          </button>
+        </div>
+
+        {search && (
           <>
             <input className="searchInput" autoFocus value={q} onChange={(e) => setQ(e.target.value)}
               placeholder={t('a4.searchPh')} />
@@ -219,34 +212,108 @@ export function A4() {
             </div>
           </>
         )}
-        {linked && (
-          <div className="card accent">
-            <h4>{state.onboarding.employerName ?? p.employerKo}</h4>
-            <p>{t('a4.pendingMsg')}</p>
-            <div style={{ marginTop: 8 }}>
-              <span className={`badge ${state.onboarding.employer === 'verified' ? 'ok' : 'wait'}`}>
-                {state.onboarding.employer === 'verified' ? t('a4.verified') : t('a4.waiting')}
+      </div>
+      <div className="appFoot">
+        <button className="btn ghost" onClick={() => dispatch({ type: 'EMPLOYER_LINK', method: 'skip' })}>
+          {t('a4.later2')}
+        </button>
+      </div>
+    </>
+  )
+}
+
+/* 회사 연결 단계 인디케이터 — A4·A4-1·A4-2 공통 (3/4, 75%) */
+function CompanyStep({ t }: { t: (k: string) => string }) {
+  return (
+    <>
+      <div className="prog"><span>{t('prog.company')}</span><span>3 / 4</span></div>
+      <div className="bar"><i style={{ width: '75%' }} /></div>
+    </>
+  )
+}
+
+/* A4-1 회사 QR 스캔 — 뷰파인더에 QR이 들어오면 자동 인식 */
+export function A41() {
+  const { dispatch, p, t } = useApp()
+  const [reading, setReading] = useState(false)
+  const scan = () => {
+    if (reading) return
+    setReading(true)
+    setTimeout(() => {
+      setReading(false)
+      dispatch({ type: 'EMPLOYER_LINK', method: 'qr', company: p.employerKo })
+    }, 1800)
+  }
+  return (
+    <>
+      <div className="appBody">
+        <CompanyStep t={t} />
+        <div className="h1">{t('a41.title')}</div>
+        <p className="lead">{t('a41.sub')}</p>
+
+        <button className="scanView" onClick={scan}>
+          <span className="scanChip">
+            <i className={reading ? 'live' : ''} />{reading ? t('a41.reading') : t('a41.chip')}
+          </span>
+          <span className="scanFlash"><Icon name="flash" size={16} /></span>
+          <span className="scanFrame" />
+          {reading && <span className="scanQr"><Qr seed={p.employerKo} size={104} /></span>}
+          {reading && <span className="scanline" />}
+          <span className="scanGuide">{t('a41.guide')}</span>
+        </button>
+
+        <button className="btn ghost" onClick={() => dispatch({ type: 'NAV', screen: 'A4' })}>
+          <Icon name="search" size={18} style={{ marginRight: 7 }} />{t('a4.search')}
+        </button>
+
+        <div className="note amber" style={{ marginTop: 12 }}>
+          <Icon name="chat" size={16} />
+          <span><b style={{ display: 'block', marginBottom: 2 }}>{t('a41.noQr')}</b>{t('a41.noQrS')}</span>
+        </div>
+      </div>
+    </>
+  )
+}
+
+/* A4-2 스캔 결과 — 연결된 회사 확인 후 다음 단계로 */
+export function A42() {
+  const { state, dispatch, p, t } = useApp()
+  const name = state.onboarding.employerName ?? p.employerKo
+  const verified = state.onboarding.employer === 'verified'
+  return (
+    <>
+      <div className="appBody">
+        <CompanyStep t={t} />
+        <div className="h1">{t('a4.title')}</div>
+        <p className="lead">{t('a4.lead')}</p>
+
+        <div className="card accent">
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <div className="ico"><Icon name="scan" size={20} /></div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h4 style={{ margin: '2px 0 6px' }}>{name}</h4>
+              <span className={`badge ${verified ? 'ok' : 'wait'}`}>
+                {verified ? <Icon name="check" size={13} strokeWidth={2.6} /> : <Icon name="refresh" size={13} strokeWidth={2.2} />}
+                {verified ? t('a4.verified') : t('a4.waiting')}
               </span>
             </div>
           </div>
-        )}
+          <p style={{ marginTop: 10 }}>{t('a4.pendingMsg')}</p>
+          <button className="linkBtn" onClick={() => dispatch({ type: 'NAV', screen: 'A4' })}>{t('a42.other')}</button>
+        </div>
+
+        <div className="agentcard">
+          <div className="who"><Logo size={24} /><b className="wmk">ONNA</b></div>
+          <p className="say">{t('a4.pendingMsg')}</p>
+        </div>
       </div>
       <div className="appFoot">
-        {linked ? (
-          <button className="btn" onClick={() => dispatch({ type: 'NAV', screen: 'A5' })}>{t('common.next')}</button>
-        ) : (
-          <>
-            {method !== 'search' && (
-              <button className="btn" disabled={method !== 'qr'}
-                onClick={() => dispatch({ type: 'EMPLOYER_LINK', method: 'qr' })}>
-                {t('common.next')}
-              </button>
-            )}
-            <button className="btn ghost" onClick={() => dispatch({ type: 'EMPLOYER_LINK', method: 'skip' })}>
-              {t('a4.later2')}
-            </button>
-          </>
-        )}
+        <button className="btn" onClick={() => dispatch({ type: 'NAV', screen: 'A5' })}>
+          {t('common.next')}<Icon name="chevron" size={17} style={{ marginLeft: 4 }} />
+        </button>
+        <button className="btn ghost" onClick={() => dispatch({ type: 'EMPLOYER_LINK', method: 'skip' })}>
+          {t('a4.later2')}
+        </button>
       </div>
     </>
   )

@@ -172,7 +172,8 @@ export function reducer(s: AppState, a: Action): AppState {
       return {
         ...s,
         onboarding: { ...s.onboarding, employer: linked ? 'pending' : 'none', employerName: linked ? name : undefined },
-        screen: 'A5',
+        // 연결되면 확인 화면(A4-2)을 거치고, 건너뛰면 바로 다음 단계
+        screen: linked ? 'A42' : 'A5',
         events: ev(s, 'employer_linked', `method=${a.method} skipped=${!linked} company=${linked ? name : '-'}`),
         trace: linked
           ? trace(s, 'orchestrator', `재직 확인 요청 발송 → ${name} (카카오톡 링크)`)

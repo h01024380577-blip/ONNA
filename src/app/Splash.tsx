@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react'
 
-/* iM뱅크 마크 — 좌측 블록 + 곡선 윙 2개로 이루어진 M 심볼 (단색 화이트) */
-function ImMark({ size = 40 }: { size?: number }) {
-  return (
-    <svg width={size * 1.3} height={size} viewBox="0 0 124 96" fill="currentColor" aria-hidden>
-      <rect x="0" y="49" width="25" height="47" rx="6" />
-      <path d="M31 96V63C31 39 48 22 71 22v30c-14 0-19 10-19 44Z" />
-      <path d="M80 96V63c0-24 17-41 40-41v30c-14 0-19 10-19 44Z" />
-    </svg>
-  )
-}
-
-/* iM뱅크 × ONNA 로딩 화면 — 파트너십 락업 */
+/* iM뱅크 × ONNA 로딩 화면 — 파트너십 락업.
+   iM뱅크 로고는 공식 화이트 버전 자산을 그대로 사용한다 (임의 재현 금지) */
 export function Splash({ onDone, ms = 2200 }: { onDone: () => void; ms?: number }) {
   const [leaving, setLeaving] = useState(false)
 
@@ -24,7 +14,7 @@ export function Splash({ onDone, ms = 2200 }: { onDone: () => void; ms?: number 
   return (
     <div className={`splash ${leaving ? 'out' : ''}`}>
       <div className="splashLock">
-        <span className="imLogo"><ImMark size={34} /><b>iM뱅크</b></span>
+        <img className="imLogo" src="/im-logo.png" alt="iM뱅크" />
         {/* iOS 웹뷰에 ✕(U+2715) 글리프가 없어 tofu가 되므로 SVG로 그린다 */}
         <svg className="splashX" viewBox="0 0 24 24" fill="none" stroke="currentColor"
           strokeWidth="2.6" strokeLinecap="round" aria-hidden>

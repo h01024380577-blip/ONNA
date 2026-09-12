@@ -695,8 +695,7 @@ button.item:active { background: var(--app-primary-tint); }
   animation: splashIn .6s cubic-bezier(.2,1.1,.4,1);
 }
 @keyframes splashIn { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
-.imLogo { display: flex; align-items: center; gap: 8px; color: #fff; flex: none; }
-.imLogo b { font-size: 25px; font-weight: 800; letter-spacing: -.02em; white-space: nowrap; }
+.imLogo { height: 27px; width: auto; flex: none; display: block; }
 .splashX { width: 15px; height: 15px; flex: none; color: #fff; opacity: .6; }
 .onnaLogo { display: flex; align-items: center; gap: 7px; flex: none; }
 .onnaLogo img {
@@ -710,7 +709,7 @@ button.item:active { background: var(--app-primary-tint); }
 /* 좁은 화면(작은 기기)에서도 락업이 잘리지 않게 축소 */
 @media (max-width: 380px) {
   .splashLock { gap: 9px; padding: 0 12px; }
-  .imLogo b { font-size: 21px; }
+  .imLogo { height: 23px; }
   .onnaLogo b { font-size: 22px; }
   .onnaLogo img { width: 26px; height: 26px; }
 }

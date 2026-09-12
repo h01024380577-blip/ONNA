@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+.vercel
+
+# Capacitor 네이티브(iOS) 산출물 — 웹 배포에는 불필요
+ios/App/Pods
+ios/App/App/public

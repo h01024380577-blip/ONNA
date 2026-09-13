@@ -7,6 +7,8 @@ import { precheck, newTxId, newTraceId, MONTHLY_LIMIT } from './mock/rules'
 
 export const SLA_DEMO_SEC = 30 // 파일럿 SLA 30분 → 데모 30초
 export const ARRIVE_DEMO_SEC = 45 // 도착 웹훅 데모 45초
+/** 계좌 개설 전에 A6이 표시하는 자리표시자 — 화면과 리듀서가 같은 값을 쓴다 */
+export const A6_FALLBACK_ACCT = '508-12-000000'
 
 export type Action =
   | { type: 'RESET'; persona: PersonaId; startAt: 'onboarding' | 'home' }
@@ -385,8 +387,9 @@ export function reducer(s: AppState, a: Action): AppState {
     /* A6 — 근로자가 급여계좌를 사장님께 보낸다. 사장님 화면의 알림함에 새 알림으로 쌓인다.
        재직 확인 요청과는 별개의 알림이라 상태도 따로 둔다. */
     case 'SHARE_ACCOUNT': {
-      const acct = s.onboarding.accountNo
-      if (!acct) return s
+      // 계좌번호가 없으면 예전엔 조용히 아무 일도 안 일어났다(버튼이 죽은 것처럼 보임).
+      // A6이 화면에 쓰는 것과 같은 값을 써서 클릭은 언제나 반응하게 한다.
+      const acct = s.onboarding.accountNo ?? A6_FALLBACK_ACCT
       return {
         ...s,
         accountShare: { at: Date.now(), channel: a.channel, acct, read: false },

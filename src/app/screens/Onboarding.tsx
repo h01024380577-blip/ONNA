@@ -7,6 +7,7 @@ import { Face } from '../Face'
 import { Logo, LogoHero } from '../Logo'
 import { searchCompanies } from '../../mock/companies'
 import { NATIONS, PERSONAS } from '../../mock/personas'
+import { A6_FALLBACK_ACCT } from '../../store'
 import { makeT } from '../../i18n'
 import type { PersonaId } from '../../types'
 
@@ -355,7 +356,7 @@ export function A5() {
 export function A6() {
   const { state, dispatch, p, t } = useApp()
   const [shareOpen, setShareOpen] = useState(false)
-  const acct = state.onboarding.accountNo ?? '508-12-000000'
+  const acct = state.onboarding.accountNo ?? A6_FALLBACK_ACCT
   const sent = state.accountShare?.channel
   return (
     <>
@@ -385,17 +386,20 @@ export function A6() {
                 아래 계좌로 급여를 보내 주세요. iM뱅크 {acct}
               </p>
               {/* 보내면 사장님 화면 알림함에 '급여계좌 안내'가 새 알림으로 뜬다 */}
-              {sent ? (
+              {sent && (
                 <div className="sentNote">
                   <Icon name="check" size={15} strokeWidth={2.4} />
                   <span>{t('a6.sent', { channel: sent === 'kakao' ? t('a6.kakao') : 'SMS' })}</span>
                 </div>
-              ) : (
-                <div className="row" style={{ marginTop: 8 }}>
-                  <button className="btn ghost sm" onClick={() => dispatch({ type: 'SHARE_ACCOUNT', channel: 'kakao' })}>{t('a6.kakao')}</button>
-                  <button className="btn ghost sm" onClick={() => dispatch({ type: 'SHARE_ACCOUNT', channel: 'sms' })}>SMS</button>
-                </div>
               )}
+              {/* 보낸 뒤에도 버튼을 남긴다 — 채널을 바꿔 다시 보낼 수 있고,
+                  패널이 눌리지 않는 화면처럼 보이지 않는다 */}
+              <div className="row" style={{ marginTop: 8 }}>
+                <button className={`btn sm ${sent === 'kakao' ? '' : 'ghost'}`}
+                  onClick={() => dispatch({ type: 'SHARE_ACCOUNT', channel: 'kakao' })}>{t('a6.kakao')}</button>
+                <button className={`btn sm ${sent === 'sms' ? '' : 'ghost'}`}
+                  onClick={() => dispatch({ type: 'SHARE_ACCOUNT', channel: 'sms' })}>SMS</button>
+              </div>
             </div>
           )}
         </div>

@@ -365,14 +365,17 @@ button.item:active { background: var(--app-primary-tint); }
 .navbar button span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .navbar button.on { color: var(--app-primary); font-weight: 600; }
 .navbar button.on svg { color: var(--app-primary); }
+/* 에이전트 채팅 진입 — 테마 청록 + ONNA 워드마크 */
 .micBtn {
   width: 58px !important; height: 58px; border-radius: 50% !important;
-  background: var(--app-agent) !important; color: #fff !important;
+  background: var(--app-primary) !important; color: #fff !important;
   display: flex; align-items: center; justify-content: center;
   margin-top: -30px; gap: 0 !important;
-  box-shadow: 0 8px 20px rgba(232,150,15,.45);
+  box-shadow: 0 8px 20px rgba(12,161,131,.45);
+  font-family: 'Fredoka', var(--sans); font-weight: 600;
+  font-size: 13px !important; letter-spacing: .02em;
 }
-.micBtn svg { color: #fff !important; }
+.micBtn:active { background: var(--app-primary-press) !important; }
 
 /* camera / qr */
 .cam {

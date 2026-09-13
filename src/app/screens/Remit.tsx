@@ -445,7 +445,7 @@ export function NavBar({ active }: { active: 'home' | 'send' | 'record' | 'help'
     <div className="navbar">
       <button className={active === 'home' ? 'on' : ''} onClick={() => dispatch({ type: 'NAV', screen: 'B1' })}><Icon name="home" size={23} /><span>{t('b1.navHome')}</span></button>
       <button className={active === 'send' ? 'on' : ''} onClick={() => dispatch({ type: 'NAV', screen: 'B2' })}><Icon name="send" size={23} /><span>{t('b1.navSend')}</span></button>
-      <button className="micBtn" aria-label={t('chat.title')} onClick={() => window.dispatchEvent(new CustomEvent('onna:chat'))}><Icon name="sparkle" size={26} /></button>
+      <button className="micBtn" aria-label={t('chat.title')} onClick={() => window.dispatchEvent(new CustomEvent('onna:chat'))}>ONNA</button>
       <button className={active === 'record' ? 'on' : ''} onClick={() => dispatch({ type: 'NAV', screen: 'C1' })}><Icon name="record" size={23} /><span>{t('b1.navRecord')}</span></button>
       <button className={active === 'help' ? 'on' : ''} onClick={() => dispatch({ type: 'NAV', screen: 'HELP' })}><Icon name="help" size={23} /><span>{t('b1.navHelp')}</span></button>
     </div>

@@ -1,4 +1,4 @@
-import { json, bad } from './_lib'
+import { json, bad, preflight } from './_lib'
 
 // 수출입은행 API가 해외 리전에서 느려 표본이 모자라는 일이 있어 서울 고정
 export const config = { runtime: 'edge', regions: ['icn1'] }
@@ -154,6 +154,9 @@ async function fetchRates(): Promise<{
 }
 
 export default async function handler(req: Request) {
+  const pre = preflight(req)
+  if (pre) return pre
+
   const q = new URL(req.url).searchParams.get('quote')?.toUpperCase() as Quote | null
   if (q && !QUOTES.includes(q)) return bad('unsupported quote')
 

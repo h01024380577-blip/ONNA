@@ -6,6 +6,7 @@ import { WorkerPhone } from '../app/Phone'
 import { FamilyPhone } from '../web/FamilyPhone'
 import { EmployerCard, OpsCard } from '../web/Desk'
 import type { PersonaId, Scenario, Screen } from '../types'
+import { DataStatus } from './DataStatus'
 
 type View = 'worker' | 'family' | 'employer' | 'ops'
 
@@ -142,6 +143,8 @@ export function Shell() {
                   onClick={() => dispatch({ type: 'NAV', screen: j.s })}>{j.label}</button>
               ))}
             </div>
+
+            <DataStatus />
 
             <h3>지표 (부록 D)</h3>
             <div className="metric"><span className="k">현재 화면</span><span className="v">{state.screen}</span></div>

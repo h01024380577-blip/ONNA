@@ -7,6 +7,7 @@ import { FamilyPhone } from '../web/FamilyPhone'
 import { EmployerCard, OpsCard } from '../web/Desk'
 import { useSimTimers } from './useSimTimers'
 import type { PersonaId, Scenario } from '../types'
+import { DataStatus } from './DataStatus'
 
 type View = 'worker' | 'family' | 'employer' | 'ops'
 
@@ -99,6 +100,8 @@ export function MobileShell() {
                   onClick={() => dispatch({ type: 'SET_SCENARIO', scenario: sc.id })}>{sc.label}</button>
               ))}
             </div>
+
+            <DataStatus />
 
             <h3>기타</h3>
             <div className="pillRow">

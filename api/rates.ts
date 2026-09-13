@@ -1,4 +1,4 @@
-import { json } from './_lib'
+import { json, preflight } from './_lib'
 
 export const config = { runtime: 'edge' }
 

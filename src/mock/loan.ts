@@ -1,4 +1,5 @@
 import type { Persona } from '../types'
+import { apiUrl } from '../lib/api'
 
 /* 소액대출 한도·금리 산정 — 판정은 규칙 엔진(코드), 에이전트는 사유 설명만 (AG-3)
    기록 기반: 재직 개월 + 송금 횟수 + 공과금 정시 납부가 근거 */
@@ -23,7 +24,7 @@ export const benchmark = {
 /** /api/rates 의 공시 금리로 기준선을 갱신 */
 export async function loadLiveRates(): Promise<void> {
   try {
-    const r = await fetch('/api/rates', { signal: AbortSignal.timeout(6000) })
+    const r = await fetch(apiUrl('/api/rates'), { signal: AbortSignal.timeout(6000) })
     if (!r.ok) return
     const d = (await r.json()) as { m6?: number; m12?: number; m24?: number; asOf?: string; source?: string }
     if (typeof d.m6 !== 'number' || typeof d.m12 !== 'number' || typeof d.m24 !== 'number') return

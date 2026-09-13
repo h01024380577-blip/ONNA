@@ -8,6 +8,7 @@ import { LoanEntry } from './Loan'
 import { fmtMMSS } from '../../i18n'
 import { FX, fxAdvantagePct, fxLive } from '../../mock/fx'
 import { SLA_DEMO_SEC } from '../../store'
+import { apiUrl } from '../../lib/api'
 
 /* B0 잠금화면 푸시 — RM-1 */
 export function B0() {
@@ -47,7 +48,7 @@ function FxBlock() {
   const lang = state.lang ?? 'ko'
   useEffect(() => {
     let alive = true
-    fetch('/api/fx-brief', {
+    fetch(apiUrl('/api/fx-brief'), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       signal: AbortSignal.timeout(12_000),

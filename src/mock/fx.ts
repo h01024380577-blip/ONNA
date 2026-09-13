@@ -1,4 +1,5 @@
 import type { Currency, Quote } from '../types'
+import { apiUrl } from '../lib/api'
 
 // GET /fx/quote 목 — 은행 고시 환율 + 3개월 평균 (RM-3: 숫자는 API 값, 문장만 템플릿)
 interface FxInfo {
@@ -31,7 +32,7 @@ export const fxLive = { on: false, asOf: '' }
    컴포넌트 구조를 바꾸지 않고 실값으로 전환한다. 실패하면 목값을 그대로 쓴다. */
 export async function loadLiveFx(): Promise<void> {
   try {
-    const r = await fetch('/api/fx', { signal: AbortSignal.timeout(6000) })
+    const r = await fetch(apiUrl('/api/fx'), { signal: AbortSignal.timeout(6000) })
     if (!r.ok) return
     const d = (await r.json()) as {
       asOf: string

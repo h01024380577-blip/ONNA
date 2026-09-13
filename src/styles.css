@@ -916,3 +916,12 @@ button.item:active { background: var(--app-primary-tint); }
   color: var(--desk-muted); margin: 18px 0 8px; font-weight: 500;
 }
 .devSheet h3:first-child { margin-top: 0; }
+
+/* 콘솔 데이터 출처 — 목업 폴백 상태가 눈에 보이게 */
+.dataStatus { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.dsRow { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.dsDot { width: 7px; height: 7px; border-radius: 50%; background: #e0604d; flex: 0 0 auto; }
+.dsDot.on { background: #2fbf71; }
+.dsDot.warn { background: #e8a33d; }
+.dsLabel { font-weight: 600; min-width: 92px; }
+.dsNote { opacity: 0.65; }

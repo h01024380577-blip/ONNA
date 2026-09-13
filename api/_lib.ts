@@ -7,11 +7,22 @@
 export const MODEL_CHAT = 'gpt-4o-mini'
 export const MODEL_VISION = 'gpt-4.1-mini'
 
+/* Capacitor iOS 셸은 다른 오리진(localhost:5199 · capacitor://)에서 뜨므로
+   교차 출처로 이 API를 부른다. 사용자 자격증명이 걸린 API가 아니고
+   키는 전부 서버에만 있으므로 공개 허용해도 노출되는 것이 없다. */
+const CORS = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-methods': 'GET,POST,OPTIONS',
+  'access-control-allow-headers': 'content-type',
+  'access-control-max-age': '86400',
+}
+
 export const json = (data: unknown, status = 200, cacheSec = 0) =>
   new Response(JSON.stringify(data), {
     status,
     headers: {
       'content-type': 'application/json; charset=utf-8',
+      ...CORS,
       ...(cacheSec
         ? { 'cache-control': `public, s-maxage=${cacheSec}, stale-while-revalidate=86400` }
         : { 'cache-control': 'no-store' }),
@@ -19,6 +30,11 @@ export const json = (data: unknown, status = 200, cacheSec = 0) =>
   })
 
 export const bad = (msg: string, status = 400) => json({ error: msg }, status)
+
+/** POST + content-type: application/json 은 프리플라이트를 부른다.
+   각 핸들러 맨 앞에서 이걸 먼저 처리해야 iOS에서 요청이 막히지 않는다. */
+export const preflight = (req: Request): Response | null =>
+  req.method === 'OPTIONS' ? new Response(null, { status: 204, headers: CORS }) : null
 
 /** OpenAI Chat Completions 호출 — 실패 시 throw */
 export async function openai(body: Record<string, unknown>, timeoutMs = 25_000) {

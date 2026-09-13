@@ -1,4 +1,4 @@
-import { json, bad, openai, parseJson, copyLint, rateLimit, clientIp } from './_lib'
+import { json, bad, openai, parseJson, copyLint, rateLimit, clientIp, preflight } from './_lib'
 
 export const config = { runtime: 'edge' }
 
@@ -66,6 +66,9 @@ function numbersAreGrounded(text: string, ctx: Ctx): boolean {
 }
 
 export default async function handler(req: Request) {
+  const pre = preflight(req)
+  if (pre) return pre
+
   if (req.method !== 'POST') return bad('POST only', 405)
   if (!rateLimit(clientIp(req), 30, 60_000)) return bad('too many requests', 429)
 

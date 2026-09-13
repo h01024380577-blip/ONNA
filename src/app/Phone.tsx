@@ -10,6 +10,7 @@ import { D1, D2, D3 } from './screens/Loan'
 import { FX, fxAdvantagePct } from '../mock/fx'
 import { loanOffer } from '../mock/loan'
 import type { Screen } from '../types'
+import { apiUrl } from '../lib/api'
 
 /* 상단 앱바 — 뒤로(이전 단계) / 섹션 타이틀 / 홈·아바타. A6·B5는 완료 화면, B0은 잠금, C1·HELP는 하단 탭 담당 */
 const TOP_NAV: Partial<Record<Screen, { back?: Screen; home?: boolean; title?: string }>> = {
@@ -135,7 +136,7 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
 
     const offer = loanOffer(p, state.sessionRemits)
     try {
-      const res = await fetch('/api/agent', {
+      const res = await fetch(apiUrl('/api/agent'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         signal: AbortSignal.timeout(15_000),

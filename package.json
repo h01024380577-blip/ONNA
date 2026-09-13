@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:api": "node scripts/check-api-calls.mjs",
+    "prebuild": "node scripts/check-api-calls.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",

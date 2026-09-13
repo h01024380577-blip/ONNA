@@ -5,6 +5,7 @@ import { Logo } from '../Logo'
 import { Bill, BILL } from '../Bill'
 import { LoanEntry } from './Loan'
 import { NavBar } from './Remit'
+import { apiUrl } from '../../lib/api'
 
 /* C1 내 기록 — CR-1/2: 요약 + 진행 바 + 월별 타임라인 + 검증됨 배지 */
 export function C1() {
@@ -143,7 +144,7 @@ export function Help() {
     setAi(null); setAiErr(false); setAiKo(false); setAiBusy(true)
     try {
       const image = await downscale(f)
-      const r = await fetch('/api/doc', {
+      const r = await fetch(apiUrl('/api/doc'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         signal: AbortSignal.timeout(60_000),

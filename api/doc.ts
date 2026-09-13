@@ -1,4 +1,4 @@
-import { json, bad, openai, parseJson, copyLint, maskPii, rateLimit, clientIp, MODEL_VISION } from './_lib'
+import { json, bad, openai, parseJson, copyLint, maskPii, rateLimit, clientIp, MODEL_VISION, preflight } from './_lib'
 
 export const config = { runtime: 'edge' }
 
@@ -43,6 +43,9 @@ OUTPUT strict JSON only:
 Put at most 4 items in "fields".`
 
 export default async function handler(req: Request) {
+  const pre = preflight(req)
+  if (pre) return pre
+
   if (req.method !== 'POST') return bad('POST only', 405)
   if (!rateLimit(clientIp(req), 10, 60_000)) return bad('too many requests', 429)
 

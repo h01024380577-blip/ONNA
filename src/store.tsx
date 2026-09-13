@@ -1,9 +1,10 @@
 import { createContext, useContext, useReducer, type Dispatch, type ReactNode } from 'react'
-import type { AppState, HoldCode, Lang, PersonaId, Scenario, Screen } from './types'
+import type { AgentPlan, AppState, HoldCode, Lang, PersonaId, Scenario, Screen, StepKey } from './types'
 import { PERSONAS } from './mock/personas'
 import { loanOffer, monthlyPayment } from './mock/loan'
-import { getQuote, fxAdvantagePct } from './mock/fx'
+import { getQuote } from './mock/fx'
 import { precheck, newTxId, newTraceId, MONTHLY_LIMIT } from './mock/rules'
+import { collectSignals } from './agent/signals'
 
 export const SLA_DEMO_SEC = 30 // 파일럿 SLA 30분 → 데모 30초
 export const ARRIVE_DEMO_SEC = 45 // 도착 웹훅 데모 45초
@@ -21,6 +22,9 @@ export type Action =
   | { type: 'CONSENT'; key: 'salary' | 'remit' | 'employment'; value: boolean }
   | { type: 'ACCOUNT_OPENED' }
   | { type: 'SALARY_CREDITED' }
+  | { type: 'ANALYSIS_PHASE'; phase: StepKey }
+  | { type: 'ANALYSIS_RESULT'; plan: AgentPlan; source: 'llm' | 'template'; latencyMs: number }
+  | { type: 'ANALYSIS_DONE' }
   | { type: 'PROPOSAL_ACTION'; action: 'send' | 'change' | 'later' }
   | { type: 'SET_DRAFT'; amount: number }
   | { type: 'EXECUTE' } // B3 지문 → 규정 점검

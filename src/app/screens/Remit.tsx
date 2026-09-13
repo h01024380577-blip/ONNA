@@ -140,7 +140,7 @@ export function B1() {
         {!state.proposal && !state.tx && (
           <div className="agentcard">
             <div className="who"><Logo size={24} /><b className="wmk">ONNA</b></div>
-            <p className="say">{t('a6.agentSay')}</p>
+            <p className="say long">{t('a6.agentSay')}</p>
           </div>
         )}
 

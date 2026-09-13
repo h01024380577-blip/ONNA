@@ -371,7 +371,7 @@ export function A6() {
         </div>
         <div className="agentcard">
           <div className="who"><Logo size={24} /><b className="wmk">ONNA</b></div>
-          <p className="say">{t('a6.agentSay')}</p>
+          <p className="say long">{t('a6.agentSay')}</p>
           <p className="why">{t('a6.agentWhy')}</p>
           <button className="btn agent sm" style={{ marginTop: 8 }} onClick={() => setShareOpen(!shareOpen)}>
             {t('a6.share')}

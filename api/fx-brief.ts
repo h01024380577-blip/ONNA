@@ -30,13 +30,20 @@ The baseline differs by currency and is given as "basis":
   "reference"  : a fixed reference rate, NOT a measured average.
 Never call the baseline an average when basis is "reference" — say "usual" or "normal" instead.
 
-Guidance by advantagePct (today vs baseline):
-  >= +1.0  : clearly better than usual
-  +0.2..1.0: slightly better than usual
-  -0.2..0.2: about the same as usual
-  <= -0.2  : lower than usual — say it plainly, do not spin it
+The strength of today's rate is ALREADY DECIDED for you and given as "strength".
+Do not re-judge it from the numbers. Write the sentence to match it exactly:
+  "clearly-better"  : better than usual, stated plainly and with confidence.
+                      NEVER use a hedging word here (slightly, a little, sedikit,
+                      một chút, थोरै, 조금, 약간). It is a solid difference.
+  "slightly-better" : better than usual, but only a little. A hedging word belongs here.
+  "same"            : about the same as usual.
+  "lower"           : lower than usual — say it plainly, do not spin it.
 
 OUTPUT strict JSON: {"text":"<one sentence in requested language>"}`
+
+/** 5개 언어의 "조금·약간" 부류 — 확실히 유리한 날에 나오면 안 되는 말 */
+const HEDGE =
+  /\b(slightly|a little|a bit|sedikit|agak|một chút|chút ít|hơi)\b|조금|약간|살짝|थोरै|अलिकति/i
 
 export default async function handler(req: Request) {
   if (req.method !== 'POST') return bad('POST only', 405)
@@ -60,12 +67,21 @@ export default async function handler(req: Request) {
   const pct = typeof body.advantagePct === 'number' ? body.advantagePct : null
   if (pct === null || !body.rateText) return bad('missing rate data')
 
+  // 유리한 정도는 코드가 판정한다 (PRD AG-3: 판단은 규칙, 에이전트는 설명만).
+  // LLM에게 맡기면 +6.9%를 "조금 더"라고 쓰는 일이 생긴다.
+  const strength =
+    pct >= 1.0 ? 'clearly-better'
+    : pct >= 0.2 ? 'slightly-better'
+    : pct > -0.2 ? 'same'
+    : 'lower'
+
   const ctx = {
     currency: body.quote,
     rateToday: body.rateText, // ₩1 당 현지통화 표기
-    advantagePct: pct, // 90일 기준선 대비 %
+    advantagePct: pct, // 기준선 대비 %
     sample: body.sampleText, // 10만원 환산 예시
     basis: body.basis === '90d-average' ? '90d-average' : 'reference',
+    strength,
   }
 
   try {
@@ -87,6 +103,9 @@ export default async function handler(req: Request) {
     const raw = d?.choices?.[0]?.message?.content ?? ''
     const text = (parseJson<{ text?: string }>(raw)?.text ?? '').trim()
     if (!text || !copyLint(text)) return json({ fallback: true })
+
+    // 확실히 유리한 날인데 "조금"으로 깎아 쓰면 폐기 — 프롬프트만으로는 새는 케이스
+    if (strength === 'clearly-better' && HEDGE.test(text)) return json({ fallback: true })
 
     // 컨텍스트에 없는 숫자를 만들어내면 폐기 (AG-4)
     const ctxDigits = JSON.stringify(ctx).replace(/\D/g, '')

@@ -7,6 +7,11 @@ export const NATIONS: Array<{ persona: PersonaId; native: string; ko: string; la
   { persona: 'minh', native: 'Việt Nam', ko: '베트남', langLabel: 'Tiếng Việt', cur: 'VND' },
 ]
 
+/* 데모 패널 표기용 — 화면에 'id'·'ne'·'vi' 같은 코드 대신 사람이 읽는 국적명을 쓴다 */
+export const NATION_BY_PERSONA = Object.fromEntries(
+  NATIONS.map((n) => [n.persona, n]),
+) as Record<PersonaId, (typeof NATIONS)[number]>
+
 // 부록 A 언어별 초기 설정 반영: 가족 알림 기본 채널 — id: WhatsApp / ne: Viber→WhatsApp / vi: Zalo
 export const PERSONAS: Record<PersonaId, Persona> = {
   budi: {

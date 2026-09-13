@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store'
-import { PERSONAS } from '../mock/personas'
+import { NATION_BY_PERSONA, PERSONAS } from '../mock/personas'
 import { WorkerPhone } from '../app/Phone'
 import { Icon } from '../app/Icon'
 import { FamilyPhone } from '../web/FamilyPhone'
@@ -68,11 +68,11 @@ export function MobileShell() {
             <h3>이벤트 트리거</h3>
             <button className="devBtn" disabled={!hasAccount || !!state.salaryEvent}
               onClick={pick(() => { dispatch({ type: 'SALARY_CREDITED' }); setView('worker'); setOpen(false) })}>
-              <Icon name="money" size={17} strokeWidth={2} style={{ marginRight: 8 }} />급여 입금 웹훅 (salary.credited)
+              <Icon name="money" size={17} strokeWidth={2} style={{ marginRight: 8 }} />급여 입금 발생
             </button>
             <button className="devBtn subtle" disabled={state.tx?.status !== 'processing'}
               onClick={() => dispatch({ type: 'TX_ARRIVED' })}>
-              도착 웹훅 지금 발생
+              송금 도착 지금 발생
             </button>
             <button className="devBtn subtle"
               onClick={pick(() => { dispatch({ type: 'RESET', persona: state.personaId, startAt }); setView('worker'); setOpen(false) })}>
@@ -84,7 +84,7 @@ export function MobileShell() {
               {(Object.keys(PERSONAS) as PersonaId[]).map((id) => (
                 <button key={id} className={`pill ${state.personaId === id ? 'on' : ''}`}
                   onClick={pick(() => { dispatch({ type: 'RESET', persona: id, startAt }); setView('worker'); setOpen(false) })}>
-                  {PERSONAS[id].name} · {PERSONAS[id].lang}
+                  {PERSONAS[id].name} · {NATION_BY_PERSONA[id].ko}
                 </button>
               ))}
             </div>

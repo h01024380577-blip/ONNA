@@ -4,7 +4,7 @@ import { useSimTimers } from './useSimTimers'
 import { NATION_BY_PERSONA, PERSONAS } from '../mock/personas'
 import { WorkerPhone } from '../app/Phone'
 import { FamilyPhone } from '../web/FamilyPhone'
-import { EmployerCard } from '../web/Desk'
+import { EmployerPhone } from '../web/Desk'
 import { DemoConsole, VIEWS, familyUnread, type View } from './DemoConsole'
 import { DeviceFrame } from './DeviceFrame'
 
@@ -54,10 +54,10 @@ export function Shell() {
       <div className="shellMain">
         <main className="stageArea">
           <div className="deviceWrap">
-            {/* 근로자 앱·가족 페이지는 실기와 같은 기기 화면으로, 사장님 승인은 웹 카드로 */}
+            {/* 세 화면 모두 실기와 같은 기기 안에서 — 근로자·가족·사장님 각자의 폰 */}
             {view === 'worker' && <DeviceFrame dark={state.dark}><WorkerPhone idFailMode={idFailMode} /></DeviceFrame>}
+            {view === 'employer' && <DeviceFrame dark={state.dark}><EmployerPhone /></DeviceFrame>}
             {view === 'family' && <DeviceFrame><FamilyPhone /></DeviceFrame>}
-            {view === 'employer' && <EmployerCard />}
           </div>
           <div className="stageHint">{HINT[view]}</div>
         </main>

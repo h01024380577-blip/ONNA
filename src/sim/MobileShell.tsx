@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { WorkerPhone } from '../app/Phone'
 import { Icon } from '../app/Icon'
 import { FamilyPhone } from '../web/FamilyPhone'
-import { EmployerCard } from '../web/Desk'
+import { EmployerPhone } from '../web/Desk'
 import { useSimTimers } from './useSimTimers'
 import { DemoConsole, type View } from './DemoConsole'
 
@@ -20,7 +20,7 @@ export function MobileShell() {
       <div className="screenHost">
         {view === 'worker' && <WorkerPhone idFailMode={idFailMode} />}
         {view === 'family' && <FamilyPhone />}
-        {view === 'employer' && <div className="mobileDesk"><EmployerCard /></div>}
+        {view === 'employer' && <EmployerPhone />}
       </div>
 
       <button className="fab" onClick={() => setOpen(true)} aria-label="데모 패널"><Icon name="gear" size={20} strokeWidth={2} /></button>

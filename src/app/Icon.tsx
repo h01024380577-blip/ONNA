@@ -7,12 +7,13 @@ export type IconName =
   | 'camera' | 'finger' | 'copy' | 'bell' | 'close' | 'sparkle' | 'scan' | 'flash'
 
 /** 얇은 stroke 라인 아이콘 세트 — currentColor 상속, placeholder 텍스트/이모지 대체 */
-export function Icon({ name, size = 22, strokeWidth = 1.9, style }: { name: IconName; size?: number; strokeWidth?: number; style?: CSSProperties }) {
+export function Icon({ name, size = 22, strokeWidth = 1.9, style, className }: { name: IconName; size?: number; strokeWidth?: number; style?: CSSProperties; className?: string }) {
   const p = {
     width: size, height: size, viewBox: '0 0 24 24', fill: 'none',
     stroke: 'currentColor', strokeWidth, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const,
     style: { display: 'block', flex: 'none', ...style },
     'aria-hidden': true,
+    className,
   }
   switch (name) {
     case 'send':

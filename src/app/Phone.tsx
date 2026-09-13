@@ -7,7 +7,7 @@ import { A0, A1, A2, A3, A4, A41, A42, A5, A6 } from './screens/Onboarding'
 import { B0, B1, B2, B3, B4, B5, B7 } from './screens/Remit'
 import { C1, Help } from './screens/Record'
 import { D1, D2, D3 } from './screens/Loan'
-import { FX, fxAdvantagePct } from '../mock/fx'
+import { FX, fmtRate, fxAdvantagePct } from '../mock/fx'
 import { loanOffer } from '../mock/loan'
 import type { Screen } from '../types'
 import { apiUrl } from '../lib/api'
@@ -154,6 +154,10 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
             fxRate: fx.rate,
             fxRateText: fx.rateText,
             fxAdvantagePct: Number(fxAdvantagePct(p.currency)),
+            // 과거 환율 질문("지난주엔 얼마였어요?")의 근거. 실값을 못 받았으면 통째로 빠진다
+            fxPast: fx.past,
+            fxAvg90dText: fx.avgReal ? fmtRate(p.currency, fx.avg3m) : undefined,
+            today: new Date().toISOString().slice(0, 10),
             monthsEmployed: p.monthsEmployed,
             remitCount: p.remitCount + state.sessionRemits,
             monthsToCredit: p.monthsToCredit,

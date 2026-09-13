@@ -20,6 +20,10 @@ interface Ctx {
   fxRate?: number
   fxRateText?: string
   fxAdvantagePct?: number
+  /** 과거 시세 — 실값을 못 받았으면 통째로 없다 */
+  fxPast?: Partial<Record<'weekAgo' | 'monthAgo', { date: string; rate: number; rateText: string }>>
+  fxAvg90dText?: string
+  today?: string
   monthsEmployed?: number
   remitCount?: number
   monthsToCredit?: number
@@ -85,6 +89,15 @@ CONTEXT FIELDS
 - salary, balance, sentThisMonth, livingFloor, loanLimit, proposalAmount: Korean won.
 - fxRateText: what ₩1 is worth today, already formatted. Quote it as-is or not at all.
 - fxAdvantagePct: how much better than usual today's rate is, in percent.
+- fxPast.weekAgo / fxPast.monthAgo: what ₩1 was worth about a week / a month ago.
+  Each has .date (YYYY-MM-DD) and .rateText. Use these to answer "what was the rate
+  last week / last month?" and to compare then vs today. Say the date plainly
+  ("9월 6일에는 …"), and compare with words — higher, lower, about the same — using
+  .rate against fxRate. Do not compute a percentage yourself.
+- fxAvg90dText: the 90-day average rate, when it is available.
+- today: today's date, for working out which past point the question means.
+  If the period they ask about is not in fxPast (e.g. "last year"), say warmly that you
+  only have the last month here, and offer what you do have. Never guess a past rate.
 - monthsEmployed, remitCount, monthsToCredit: counts. loanRate: percent per year.
 - creditReady: whether they can borrow yet. See HARD RULE 7.
 

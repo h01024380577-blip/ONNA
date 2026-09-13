@@ -9,10 +9,12 @@ export const config = { runtime: 'edge', regions: ['icn1'] }
 type Quote = 'IDR' | 'NPR' | 'VND'
 const QUOTES: Quote[] = ['IDR', 'NPR', 'VND']
 
-/** 통화별 표기 규칙 — 앱의 fmtLocal과 동일한 감각 */
+/* 통화별 표기 규칙 — 앱의 fmtLocal과 동일한 감각.
+   NPR은 ₩1 = 0.11루피대라 소수 2자리로는 지난주와 오늘이 같은 숫자로 뭉개진다.
+   과거 시세 비교가 가능하도록 4자리로 쓴다(목값 'रु 0.0965'와도 자리수가 맞는다). */
 const FMT: Record<Quote, (r: number) => string> = {
   IDR: (r) => `Rp${r.toFixed(1)}`,
-  NPR: (r) => `रु ${r.toFixed(2)}`,
+  NPR: (r) => `रु ${r.toFixed(4)}`,
   VND: (r) => `${r.toFixed(1)}₫`.replace('.', ','),
 }
 
@@ -114,6 +116,50 @@ async function baseline90d(): Promise<Record<string, number>> {
   return out
 }
 
+/* 과거 시세 — "지난주엔 얼마였어요?" 같은 질문에 근거를 주려고 함께 내려보낸다.
+   수출입은행은 IDR만 고시하고 VND·NPR은 아예 없어서 과거값을 못 준다.
+   currency-api(jsDelivr CDN)는 키 없이 일자별 KRW 기준 시세를 주고 셋 다 있다.
+   보조 지표이므로 실패하면 조용히 비운다 — 없으면 에이전트가 답하지 않을 뿐이다. */
+const HISTORY_DAYS = { weekAgo: 7, monthAgo: 30 } as const
+type HistoryKey = keyof typeof HISTORY_DAYS
+
+async function currencyApiDay(ymdDash: string): Promise<Record<string, number> | null> {
+  const r = await fetch(
+    `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${ymdDash}/v1/currencies/krw.json`,
+    { signal: AbortSignal.timeout(8000) },
+  )
+  if (!r.ok) return null
+  const d = (await r.json()) as { date?: string; krw?: Record<string, number> }
+  return d.krw && typeof d.krw === 'object' ? d.krw : null
+}
+
+/** 그 날짜에 데이터가 없으면 하루씩 거슬러 최대 3일까지만 찾는다 */
+async function currencyApiNear(daysAgo: number): Promise<{ date: string; krw: Record<string, number> } | null> {
+  const kstNow = new Date(Date.now() + 9 * 3600_000)
+  for (let back = 0; back < 3; back++) {
+    const d = new Date(kstNow.getTime() - (daysAgo + back) * 86400_000)
+    const date = d.toISOString().slice(0, 10)
+    try {
+      const krw = await currencyApiDay(date)
+      if (krw) return { date, krw }
+    } catch {
+      /* 다음 날짜로 계속 */
+    }
+  }
+  return null
+}
+
+async function fetchHistory(): Promise<Partial<Record<HistoryKey, { date: string; krw: Record<string, number> }>>> {
+  const keys = Object.keys(HISTORY_DAYS) as HistoryKey[]
+  const days = await Promise.all(keys.map((k) => currencyApiNear(HISTORY_DAYS[k]).catch(() => null)))
+  const out: Partial<Record<HistoryKey, { date: string; krw: Record<string, number> }>> = {}
+  keys.forEach((k, i) => {
+    const day = days[i]
+    if (day) out[k] = day
+  })
+  return out
+}
+
 /* 2차: 공개 환율 API — 수출입은행 미지원 통화(NPR 등)와 장애 시 보완 */
 async function fromOpenApi(): Promise<{ rates: Record<string, number>; asOf: string }> {
   const r = await fetch('https://open.er-api.com/v6/latest/KRW', {
@@ -161,9 +207,10 @@ export default async function handler(req: Request) {
   if (q && !QUOTES.includes(q)) return bad('unsupported quote')
 
   try {
-    const [{ rates, asOf, sources }, real] = await Promise.all([
+    const [{ rates, asOf, sources }, real, history] = await Promise.all([
       fetchRates(),
       baseline90d().catch(() => ({} as Record<string, number>)),
+      fetchHistory().catch(() => ({})),
     ])
     const build = (c: Quote) => {
       const rate = rates[c]
@@ -174,6 +221,14 @@ export default async function handler(req: Request) {
       const baselineSource: BaselineSource = hasReal ? 'koreaexim-90d' : 'fixed'
       // 받는 돈이 많아질수록 유리 → (현재 - 기준선) / 기준선
       const advantagePct = Math.round(((rate - base) / base) * 1000) / 10
+
+      const past: Partial<Record<HistoryKey, { date: string; rate: number; rateText: string }>> = {}
+      for (const k of Object.keys(HISTORY_DAYS) as HistoryKey[]) {
+        const day = history[k]
+        const v = day?.krw[c.toLowerCase()]
+        if (day && typeof v === 'number') past[k] = { date: day.date, rate: v, rateText: FMT[c](v) }
+      }
+
       return {
         quote: c,
         rate,
@@ -181,6 +236,8 @@ export default async function handler(req: Request) {
         baseline90d: base,
         baselineSource,
         advantagePct,
+        // 과거 시세는 못 구할 수 있다 — 없으면 키 자체가 없다
+        history: past,
         asOf,
         source: sources[c],
       }

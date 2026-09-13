@@ -13,6 +13,16 @@ interface FxInfo {
   /** avg3m이 실제 90일 평균이면 true, 고정 기준선이면 false.
      화면에 "무엇 대비" 유리한지 정직하게 표기하려고 들고 다닌다 */
   avgReal?: boolean
+  /** 과거 시세 — 채팅에서 "지난주엔 얼마였어요?"에 답하는 근거.
+     /api/fx가 실값을 채워 주기 전에는 비어 있고, 그때는 에이전트가 답하지 않는다. */
+  past?: Partial<Record<PastKey, PastPoint>>
+}
+
+export type PastKey = 'weekAgo' | 'monthAgo'
+export interface PastPoint {
+  date: string // YYYY-MM-DD
+  rate: number
+  rateText: string
 }
 
 export const FX: Record<Currency, FxInfo> = {
@@ -42,6 +52,7 @@ export async function loadLiveFx(): Promise<void> {
         rateText: string
         baseline90d: number
         baselineSource?: string
+        history?: Partial<Record<PastKey, PastPoint>>
       }>
     }
     if (!Array.isArray(d.rates)) return
@@ -52,12 +63,22 @@ export async function loadLiveFx(): Promise<void> {
       f.avg3m = q.baseline90d
       f.rateText = q.rateText
       f.avgReal = q.baselineSource === 'koreaexim-90d'
+      // 과거 시세는 실값일 때만 채운다 — 목값을 지어내면 에이전트가 거짓을 말한다
+      if (q.history && Object.keys(q.history).length) f.past = q.history
     }
     fxLive.on = true
     fxLive.asOf = d.asOf
   } catch {
     /* 네트워크·API 실패 시 목 환율 유지 — 데모가 멈추지 않게 */
   }
+}
+
+/** 환율 표기 — api/fx.ts의 FMT와 같은 규칙. 90일 평균처럼 서버가 텍스트를
+   내려주지 않는 값을 같은 모양으로 쓰려고 여기에도 둔다. */
+export function fmtRate(cur: Currency, rate: number): string {
+  if (cur === 'IDR') return `Rp${rate.toFixed(1)}`
+  if (cur === 'NPR') return `रु ${rate.toFixed(4)}`
+  return `${rate.toFixed(1)}₫`.replace('.', ',')
 }
 
 export function fxAdvantagePct(cur: Currency): string {

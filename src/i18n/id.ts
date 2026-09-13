@@ -75,7 +75,7 @@ const id = {
 
   'a6.title': 'Rekening sudah jadi',
   'a6.acctLabel': 'Rekening gaji iM Bank',
-  'a6.agentSay': 'Kalau gaji masuk ke rekening ini, saya yang menghubungi Anda duluan di hari gajian.',
+  'a6.agentSay': 'Hari gajian, saya hubungi Anda duluan.',
   'a6.agentWhy': 'Lebih praktis kalau nomor rekening dikirim ke bos sekarang.',
   'a6.share': 'Kirim nomor rekening ke bos',
   'a6.histNone': 'Masa kerja 0 bulan. Dimulai setelah konfirmasi bos.',

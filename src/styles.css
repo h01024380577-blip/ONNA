@@ -362,7 +362,7 @@ button.item:active { background: var(--app-primary-tint); }
 }
 .agentcard .say { font-size: 17px; font-weight: 700; line-height: 1.4; margin: 0 0 6px; color: var(--app-ink); }
 /* 긴 안내 문구(급여 안내 등)는 줄수가 늘지 않게 한 단계 작게 */
-.agentcard .say.long { font-size: 14.5px; font-weight: 600; line-height: 1.45; }
+.agentcard .say.long { font-size: 14.5px; font-weight: 600; line-height: 1.45; text-wrap: balance; }
 .screen[data-lang='ne'] .agentcard .say.long { font-size: 13.5px; }
 .agentcard .why { font-size: 13.5px; color: var(--app-agent-ink); margin: 0 0 4px; }
 

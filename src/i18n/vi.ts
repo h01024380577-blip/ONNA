@@ -75,7 +75,7 @@ const vi = {
 
   'a6.title': 'Đã có tài khoản',
   'a6.acctLabel': 'Tài khoản lương iM Bank',
-  'a6.agentSay': 'Nhận lương vào tài khoản này, ngày lương tôi sẽ nhắn bạn trước.',
+  'a6.agentSay': 'Ngày lương, tôi sẽ nhắn bạn trước.',
   'a6.agentWhy': 'Gửi số tài khoản cho ông chủ trước cho tiện.',
   'a6.share': 'Gửi số tài khoản cho ông chủ',
   'a6.histNone': 'Làm việc 0 tháng. Bắt đầu khi ông chủ xác nhận.',

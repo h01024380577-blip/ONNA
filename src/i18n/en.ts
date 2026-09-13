@@ -75,7 +75,7 @@ const en = {
 
   'a6.title': 'Your account is ready',
   'a6.acctLabel': 'iM Bank salary account',
-  'a6.agentSay': 'If your salary comes to this account, I’ll reach out first on payday.',
+  'a6.agentSay': 'On payday, I’ll message you first.',
   'a6.agentWhy': 'It helps to send your account number to your boss now.',
   'a6.share': 'Send account number to boss',
   'a6.histNone': 'Employment: 0 months. Starts once your boss confirms.',

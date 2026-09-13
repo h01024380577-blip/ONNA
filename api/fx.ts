@@ -24,7 +24,7 @@ const BASELINE_90D: Record<Quote, number> = { IDR: 12.88, NPR: 0.1118, VND: 18.9
    휴일·시간 이전에는 빈 배열이 오므로 최근 영업일까지 거슬러 조회한다.
    외화 1단위당 원화(매매기준율)로 주므로 KRW→외화로 뒤집어 쓴다. */
 async function fromKoreaexim(): Promise<{ rates: Record<string, number>; asOf: string } | null> {
-  const key = process.env.KOREAEXIM_API_KEY
+  const key = process.env.KOREAEXIM_FX_KEY ?? process.env.KOREAEXIM_API_KEY
   if (!key) return null
 
   const kstNow = new Date(Date.now() + 9 * 3600_000)

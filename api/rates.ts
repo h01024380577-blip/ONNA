@@ -2,7 +2,8 @@ import { json } from './_lib'
 
 export const config = { runtime: 'edge' }
 
-/* 조달 기준금리 — 한국수출입은행 '국제금리'(수은채 유통수익률) 커브.
+/* 조달 기준금리 — 한국수출입은행 '대출금리' API (수은채 유통수익률 커브).
+   수은채 = 수출입은행이 발행하는 채권으로, 이 은행 대출금리의 기준이 된다.
    대출 금리를 임의 상수가 아니라 공시 지표에 연동해 설명 가능하게 만든다.
    실패하면 클라이언트가 기존 고정 기준선을 그대로 쓴다. */
 
@@ -20,7 +21,7 @@ function toMonths(name: string): number | null {
 }
 
 export default async function handler() {
-  const key = process.env.KOREAEXIM_API_KEY
+  const key = process.env.KOREAEXIM_LEND_KEY ?? process.env.KOREAEXIM_API_KEY
   if (!key) return json({ error: 'no key' }, 502)
 
   const kstNow = new Date(Date.now() + 9 * 3600_000)
@@ -62,7 +63,7 @@ export default async function handler() {
         {
           ...out,
           asOf: `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6)}`,
-          source: '한국수출입은행 국제금리 (수은채 유통수익률)',
+          source: '한국수출입은행 대출금리 (수은채 유통수익률)',
         },
         200,
         3600,

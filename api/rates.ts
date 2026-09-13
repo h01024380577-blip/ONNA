@@ -20,7 +20,10 @@ function toMonths(name: string): number | null {
   return total > 0 ? total : null
 }
 
-export default async function handler() {
+export default async function handler(req: Request) {
+  const pre = preflight(req)
+  if (pre) return pre
+
   const key = process.env.KOREAEXIM_LEND_KEY ?? process.env.KOREAEXIM_API_KEY
   if (!key) return json({ error: 'no key' }, 502)
 

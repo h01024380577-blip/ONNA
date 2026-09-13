@@ -33,13 +33,41 @@ export function B0() {
   )
 }
 
-/** 홈 상단 실시간 환율 — 국적 통화 기준. 값은 /api/fx 에서 받은 실값 */
+/** 실시간 환율 — 국적 통화 기준. 수치는 코드 계산, 해석 문장은 에이전트가 생성 */
 function FxBlock() {
-  const { p, t, local } = useApp()
+  const { state, p, t, local } = useApp()
   const fx = FX[p.currency]
   const pct = Number(fxAdvantagePct(p.currency))
   const up = pct >= 0.15
   const down = pct <= -0.15
+  const sampleText = local(Math.round(100_000 * fx.rate))
+
+  // 템플릿 문구를 먼저 보여 주고, 에이전트 판단이 오면 교체한다
+  const [brief, setBrief] = useState<string | null>(null)
+  const lang = state.lang ?? 'ko'
+  useEffect(() => {
+    let alive = true
+    fetch('/api/fx-brief', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: AbortSignal.timeout(12_000),
+      body: JSON.stringify({
+        lang,
+        quote: p.currency,
+        rateText: fx.rateText,
+        advantagePct: pct,
+        sampleText,
+      }),
+    })
+      .then((r) => r.json())
+      .then((d) => { if (alive && d?.text) setBrief(d.text) })
+      .catch(() => { /* 템플릿 문구 유지 */ })
+    return () => { alive = false }
+  }, [lang, p.currency, fx.rateText, pct, sampleText])
+
+  const template = up ? t('fx.better', { pct: Math.abs(pct) })
+    : down ? t('fx.worse', { pct: Math.abs(pct) })
+    : t('fx.same')
 
   return (
     <div className="fxBlock">
@@ -51,13 +79,15 @@ function FxBlock() {
         <span className={`fxDelta ${up ? 'up' : down ? 'down' : ''}`}>
           {up && <Icon name="chevron" size={13} strokeWidth={2.6} style={{ transform: 'rotate(-90deg)' }} />}
           {down && <Icon name="chevron" size={13} strokeWidth={2.6} style={{ transform: 'rotate(90deg)' }} />}
-          {up ? t('fx.better', { pct: Math.abs(pct) })
-            : down ? t('fx.worse', { pct: Math.abs(pct) })
-            : t('fx.same')}
+          {pct > 0 ? `+${pct}` : pct}%
         </span>
       </div>
       <div className="fxRate">₩1 = <b>{fx.rateText}</b></div>
-      <div className="fxSample">{t('fx.sample', { local: local(Math.round(100_000 * fx.rate)) })}</div>
+      <div className="fxSample">{t('fx.sample', { local: sampleText })}</div>
+      <div className="fxBrief">
+        <Logo size={17} />
+        <span>{brief ?? template}</span>
+      </div>
     </div>
   )
 }
@@ -80,8 +110,6 @@ export function B1() {
         </div>
         <p style={{ color: 'var(--app-muted)', margin: '10px 0 2px' }}>{t('b1.hi', { name: p.name })}</p>
         {state.salaryEvent && <div className="h1" style={{ margin: '0 0 12px', fontSize: 22 }}>{t('b1.payday')}</div>}
-
-        <FxBlock />
 
         {state.proposal?.status === 'new' && (
           <div className="agentcard">
@@ -115,6 +143,8 @@ export function B1() {
             <p className="say">{t('a6.agentSay')}</p>
           </div>
         )}
+
+        <FxBlock />
 
         <div className="card">
           <h4>{t('b1.myMoney')}</h4>

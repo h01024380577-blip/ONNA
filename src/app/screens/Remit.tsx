@@ -6,7 +6,7 @@ import { Payslip } from '../Payslip'
 import { Logo } from '../Logo'
 import { LoanEntry } from './Loan'
 import { fmtMMSS } from '../../i18n'
-import { FX, fxAdvantagePct } from '../../mock/fx'
+import { FX, fxAdvantagePct, fxLive } from '../../mock/fx'
 import { SLA_DEMO_SEC } from '../../store'
 
 /* B0 잠금화면 푸시 — RM-1 */
@@ -33,6 +33,35 @@ export function B0() {
   )
 }
 
+/** 홈 상단 실시간 환율 — 국적 통화 기준. 값은 /api/fx 에서 받은 실값 */
+function FxBlock() {
+  const { p, t, local } = useApp()
+  const fx = FX[p.currency]
+  const pct = Number(fxAdvantagePct(p.currency))
+  const up = pct >= 0.15
+  const down = pct <= -0.15
+
+  return (
+    <div className="fxBlock">
+      <div className="fxTop">
+        <span className="fxLabel">
+          {t('fx.today')}
+          {fxLive.on && <i className="fxLive">{t('fx.live')}</i>}
+        </span>
+        <span className={`fxDelta ${up ? 'up' : down ? 'down' : ''}`}>
+          {up && <Icon name="chevron" size={13} strokeWidth={2.6} style={{ transform: 'rotate(-90deg)' }} />}
+          {down && <Icon name="chevron" size={13} strokeWidth={2.6} style={{ transform: 'rotate(90deg)' }} />}
+          {up ? t('fx.better', { pct: Math.abs(pct) })
+            : down ? t('fx.worse', { pct: Math.abs(pct) })
+            : t('fx.same')}
+        </span>
+      </div>
+      <div className="fxRate">₩1 = <b>{fx.rateText}</b></div>
+      <div className="fxSample">{t('fx.sample', { local: local(Math.round(100_000 * fx.rate)) })}</div>
+    </div>
+  )
+}
+
 /* B1 홈 + 제안 카드 — RM-2/3/4: 3버튼 동일 크기, 근거 문장 */
 export function B1() {
   const { state, dispatch, p, t, krw, local } = useApp()
@@ -51,6 +80,8 @@ export function B1() {
         </div>
         <p style={{ color: 'var(--app-muted)', margin: '10px 0 2px' }}>{t('b1.hi', { name: p.name })}</p>
         {state.salaryEvent && <div className="h1" style={{ margin: '0 0 12px', fontSize: 22 }}>{t('b1.payday')}</div>}
+
+        <FxBlock />
 
         {state.proposal?.status === 'new' && (
           <div className="agentcard">

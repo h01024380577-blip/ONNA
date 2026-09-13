@@ -92,6 +92,12 @@ const id = {
   'b0.note': 'Notifikasi hanya untuk gaji masuk dan kabar tiba',
 
   'b1.hi': 'Halo, {name}',
+  'fx.today': 'Kurs hari ini',
+  'fx.live': 'Langsung',
+  'fx.better': '{pct}% lebih baik dari rata-rata 3 bulan',
+  'fx.worse': '{pct}% lebih rendah dari rata-rata 3 bulan',
+  'fx.same': 'Mirip rata-rata 3 bulan',
+  'fx.sample': '₩100.000 jadi sekitar {local}',
   'b1.payday': 'Hari gajian yang menyenangkan',
   'b1.say': 'Gaji sudah masuk. Kirim {amount}?',
   'b1.why': 'Kurs hari ini ₩1 = {rate}, {pct}% lebih baik dari rata-rata 3 bulan. Biaya hidup {floor} sudah disisihkan.',

@@ -50,6 +50,7 @@ export async function loadLiveFx(): Promise<void> {
 }
 
 export function fxAdvantagePct(cur: Currency): string {
+  // 표기는 소수 1자리 고정 (근거 문장·홈 블록 공용)
   const f = FX[cur]
   return (((f.rate - f.avg3m) / f.avg3m) * 100).toFixed(1)
 }

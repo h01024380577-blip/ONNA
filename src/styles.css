@@ -321,6 +321,25 @@ button.item:active { background: var(--app-primary-tint); }
 .bellBtn i { position: absolute; top: 7px; right: 8px; width: 7px; height: 7px; border-radius: 50%; background: var(--app-agent); outline: 2px solid var(--app-card); }
 .screen.frameless .homeHead { padding-right: 46px; } /* ⚙ 데모 FAB 회피 */
 
+/* 홈 상단 실시간 환율 블록 */
+.fxBlock {
+  background: var(--app-primary-tint); border: 1px solid var(--app-primary);
+  border-radius: 16px; padding: 13px 15px; margin-bottom: 12px;
+}
+.fxTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fxLabel { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--app-primary-press); }
+.screen.dark .fxLabel { color: var(--app-primary); }
+.fxLive {
+  font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .04em;
+  background: var(--app-primary); color: #fff; border-radius: 999px; padding: 2px 7px;
+}
+.fxDelta { display: inline-flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 600; color: var(--app-muted); text-align: right; }
+.fxDelta.up { color: var(--app-ok); }
+.fxDelta.down { color: var(--app-hold); }
+.fxRate { font-size: 24px; font-weight: 700; color: var(--app-muted); margin-top: 6px; letter-spacing: -.01em; }
+.fxRate b { color: var(--app-ink); font-weight: 800; }
+.fxSample { font-size: 12.5px; color: var(--app-muted); margin-top: 3px; }
+
 /* 에이전트 카드 — 온나가 말하는 유일한 형태 */
 .agentcard {
   background: var(--app-agent-tint); border: 1px solid var(--app-agent-line);

@@ -92,6 +92,12 @@ const vi = {
   'b0.note': 'Chỉ gửi thông báo khi lương về và khi tiền đến nơi',
 
   'b1.hi': 'Chào {name}',
+  'fx.today': 'Tỷ giá hôm nay',
+  'fx.live': 'Trực tiếp',
+  'fx.better': 'Tốt hơn trung bình 3 tháng {pct}%',
+  'fx.worse': 'Thấp hơn trung bình 3 tháng {pct}%',
+  'fx.same': 'Ngang trung bình 3 tháng',
+  'fx.sample': '₩100.000 đổi được khoảng {local}',
   'b1.payday': 'Ngày lương thật vui',
   'b1.say': 'Lương đã về. Gửi {amount} về nhà nhé?',
   'b1.why': 'Tỷ giá hôm nay 1₩ = {rate}, tốt hơn trung bình 3 tháng {pct}%. Đã giữ lại {floor} sinh hoạt phí.',

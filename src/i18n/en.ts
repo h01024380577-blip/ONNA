@@ -92,6 +92,12 @@ const en = {
   'b0.note': 'Push is used only for salary arrival and delivery updates',
 
   'b1.hi': 'Hello, {name}',
+  'fx.today': 'Today’s rate',
+  'fx.live': 'Live',
+  'fx.better': '{pct}% better than the 3-month average',
+  'fx.worse': '{pct}% lower than the 3-month average',
+  'fx.same': 'About the same as the 3-month average',
+  'fx.sample': '₩100,000 becomes about {local}',
   'b1.payday': 'A payday to feel good about',
   'b1.say': 'Your salary is in. Send {amount}?',
   'b1.why': 'Today’s rate: ₩1 = {rate}, {pct}% better than the 3-month average. I set aside {floor} for living costs.',

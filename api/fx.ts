@@ -1,6 +1,7 @@
 import { json, bad } from './_lib'
 
-export const config = { runtime: 'edge' }
+// 수출입은행 API가 해외 리전에서 느려 표본이 모자라는 일이 있어 서울 고정
+export const config = { runtime: 'edge', regions: ['icn1'] }
 
 /* 실제 환율 — KRW 기준. 수치는 전부 여기(코드)에서 계산하고,
    LLM은 이 값을 받아 문장만 쓴다 (PRD AG-4: 근거 없는 수치 생성 금지) */
@@ -32,7 +33,7 @@ const ymdOf = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, '')
 async function eximDay(key: string, ymd: string): Promise<Record<string, number> | null> {
   const r = await fetch(
     `https://oapi.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${key}&searchdate=${ymd}&data=AP01`,
-    { signal: AbortSignal.timeout(5000) },
+    { signal: AbortSignal.timeout(8000) },
   )
   if (!r.ok) return null
   const rows = (await r.json()) as Array<{ cur_unit?: string; deal_bas_r?: string }>
@@ -87,7 +88,15 @@ async function baseline90d(): Promise<Record<string, number>> {
     dates.push(ymdOf(d))
   }
 
-  const days = await Promise.all(dates.map((ymd) => eximDay(key, ymd).catch(() => null)))
+  const pull = (ymd: string) => eximDay(key, ymd).catch(() => null)
+  let days = await Promise.all(dates.map(pull))
+  // 일시적 실패로 표본이 모자라면 빠진 날짜만 한 번 더 시도한다
+  if (days.filter(Boolean).length < 6) {
+    const retried = await Promise.all(
+      days.map((d, i) => (d ? Promise.resolve(d) : pull(dates[i]))),
+    )
+    days = retried
+  }
   const sums: Record<string, { sum: number; n: number }> = {}
   for (const day of days) {
     if (!day) continue
@@ -100,7 +109,7 @@ async function baseline90d(): Promise<Record<string, number>> {
 
   const out: Record<string, number> = {}
   for (const [cur, { sum, n }] of Object.entries(sums)) {
-    if (n >= 7) out[cur] = sum / n // 13개 중 7개 이상 모였을 때만 채택
+    if (n >= 6) out[cur] = sum / n // 13개 중 6개 이상 모였을 때만 채택
   }
   return out
 }
@@ -173,8 +182,14 @@ export default async function handler(req: Request) {
         source: sources[c],
       }
     }
-    const body = q ? build(q) : { rates: QUOTES.map(build), asOf }
-    return json(body, 200, 3600) // 1시간 엣지 캐시
+    const built = QUOTES.map(build)
+    const body = q ? build(q) : { rates: built, asOf }
+
+    // IDR은 수출입은행 고시 통화라 정상이면 실측 평균이 나와야 한다.
+    // 폴백이 섞인 응답을 1시간 캐시하면 그 리전이 한 시간 내내 틀린 값을
+    // 내보내므로, 열화된 응답은 짧게만 캐시해 스스로 복구되게 한다.
+    const degraded = built.some((r) => r.quote === 'IDR' && r.baselineSource === 'fixed')
+    return json(body, 200, degraded ? 120 : 3600)
   } catch (e) {
     return json({ error: (e as Error).message, fallback: true }, 502)
   }

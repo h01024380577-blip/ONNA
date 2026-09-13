@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useApp } from '../hooks'
 import { Icon } from '../Icon'
 import { Logo } from '../Logo'
@@ -95,13 +95,69 @@ export function C1() {
   )
 }
 
+/** /api/doc 응답 — 수치는 모델이 서류에서 읽은 값만 담긴다 */
+interface DocResult {
+  kind: string
+  title: string | null
+  amount: string | null
+  dueDate: string | null
+  issuer: string | null
+  fields: Array<{ label: string; value: string }>
+  summary: string
+  koPhrase: string
+  confidence: 'high' | 'medium' | 'low'
+}
+
+/** 업로드 전 브라우저에서 축소 — 업로드 용량·OCR 비용을 줄이고 전송 한도를 지킨다 */
+async function downscale(file: File, max = 1600, quality = 0.82): Promise<string> {
+  const bitmap = await createImageBitmap(file)
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height))
+  const w = Math.round(bitmap.width * scale)
+  const h = Math.round(bitmap.height * scale)
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, w, h)
+  bitmap.close()
+  return canvas.toDataURL('image/jpeg', quality)
+}
+
 /* HELP — C2: 서류 촬영(최상단) → 온나가 읽어 주고 행동 제안, AG-6 사람 연결 */
 export function Help() {
-  const { dispatch, t, krw } = useApp()
+  const { state, dispatch, t, krw } = useApp()
   const [cam, setCam] = useState<null | 'aim' | 'reading'>(null)
   const [result, setResult] = useState(false)
   const [koPhrase, setKoPhrase] = useState(false)
   const [autoPaid, setAutoPaid] = useState(false)
+  // 업로드한 파일을 AI가 읽은 결과
+  const [ai, setAi] = useState<DocResult | null>(null)
+  const [aiBusy, setAiBusy] = useState(false)
+  const [aiErr, setAiErr] = useState(false)
+  const [aiKo, setAiKo] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    e.target.value = '' // 같은 파일 재선택 허용
+    if (!f) return
+    setAi(null); setAiErr(false); setAiKo(false); setAiBusy(true)
+    try {
+      const image = await downscale(f)
+      const r = await fetch('/api/doc', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        signal: AbortSignal.timeout(60_000),
+        body: JSON.stringify({ image, lang: state.lang ?? 'ko' }),
+      })
+      const d = await r.json()
+      if (!r.ok || d?.error || !d?.summary) setAiErr(true)
+      else setAi(d as DocResult)
+    } catch {
+      setAiErr(true)
+    } finally {
+      setAiBusy(false)
+    }
+  }
 
   const shoot = () => {
     if (cam === 'reading') return
@@ -154,6 +210,62 @@ export function Help() {
             <button className="btn ghost sm" style={{ marginTop: 8, width: '100%' }} onClick={() => { setResult(false); setCam('aim') }}>
               <Icon name="camera" size={16} style={{ marginRight: 6 }} />{t('help.again')}
             </button>
+          </div>
+        )}
+
+        {/* 파일 올려서 물어보기 — 촬영 바로 아래. OCR·분석은 서버(/api/doc) */}
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+        <button className="card helpCard" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
+          disabled={aiBusy} onClick={() => fileRef.current?.click()}>
+          <div className="ico"><Icon name="doc" size={20} /></div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h4>{t('help.upload')}</h4>
+            <p>{aiBusy ? t('help.analyzing') : t('help.uploadS')}</p>
+          </div>
+          {aiBusy && <span className="dotsMini"><i /><i /><i /></span>}
+        </button>
+
+        {aiErr && (
+          <div className="note amber"><Icon name="alert" size={16} strokeWidth={2} /><span>{t('help.failed')}</span></div>
+        )}
+
+        {ai && (
+          <div className="agentcard">
+            <div className="who"><Logo size={24} /><b className="wmk">ONNA</b></div>
+            <p className="say">{ai.title ?? t('help.upload')}</p>
+            <p className="why" style={{ fontSize: 14.5, color: 'var(--app-ink)', margin: '0 0 8px' }}>{ai.summary}</p>
+
+            {(ai.amount || ai.dueDate || ai.issuer || ai.fields.length > 0) && (
+              <div className="card" style={{ margin: '0 0 10px' }}>
+                {ai.amount && <div className="kv"><span className="k">{t('help.fAmount')}</span><span className="v">{ai.amount}</span></div>}
+                {ai.dueDate && <div className="kv"><span className="k">{t('help.fDue')}</span><span className="v">{ai.dueDate}</span></div>}
+                {ai.issuer && <div className="kv"><span className="k">{t('help.fIssuer')}</span><span className="v">{ai.issuer}</span></div>}
+                {ai.fields.map((f) => (
+                  <div className="kv" key={f.label + f.value}><span className="k">{f.label}</span><span className="v">{f.value}</span></div>
+                ))}
+              </div>
+            )}
+
+            {ai.confidence === 'low' && (
+              <div className="note amber" style={{ margin: '0 0 10px' }}>
+                <Icon name="alert" size={15} strokeWidth={2} /><span>{t('help.lowConf')}</span>
+              </div>
+            )}
+
+            {aiKo && ai.koPhrase && (
+              <div className="card" style={{ margin: '0 0 10px' }}>
+                <p style={{ fontSize: 14.5, color: 'var(--app-ink)', fontWeight: 600, lineHeight: 1.5 }}>“{ai.koPhrase}”</p>
+                <p style={{ marginTop: 6 }}>{t('help.koShow')}</p>
+              </div>
+            )}
+
+            <div className="row">
+              <button className="btn agent sm" onClick={() => setAiKo(!aiKo)}>{t('help.makeKo')}</button>
+              <button className="btn ghost sm" onClick={() => dispatch({ type: 'ESCALATE', reason: 'doc_question' })}>
+                {t('help.human')}
+              </button>
+            </div>
+            <p style={{ marginTop: 10, fontSize: 12, color: 'var(--app-muted)' }}>{t('help.aiNote')}</p>
           </div>
         )}
 

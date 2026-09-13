@@ -3,6 +3,11 @@ dist
 .DS_Store
 .vercel
 
+# 비밀키 — 절대 커밋 금지
+.env
+.env.*
+!.env.example
+
 # Capacitor 네이티브(iOS) 산출물 — 웹 배포에는 불필요
 ios/App/Pods
 ios/App/App/public

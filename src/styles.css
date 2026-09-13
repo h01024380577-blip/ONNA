@@ -578,6 +578,12 @@ button.item:active { background: var(--app-primary-tint); }
   color: #9aa8ae; font-size: 12.5px; padding: 0 20px;
 }
 
+/* 업로드 분석 중 표시 */
+.dotsMini { display: flex; gap: 4px; align-self: center; flex: none; }
+.dotsMini i { width: 5px; height: 5px; border-radius: 50%; background: var(--app-primary); animation: blink 1s infinite; }
+.dotsMini i:nth-child(2) { animation-delay: .18s; }
+.dotsMini i:nth-child(3) { animation-delay: .36s; }
+
 /* 카드 안 인라인 텍스트 링크 */
 .linkBtn {
   margin-top: 10px; padding: 0; border: 0; background: none; font-family: inherit;

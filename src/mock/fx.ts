@@ -20,6 +20,35 @@ export const FX: Record<Currency, FxInfo> = {
 export const FEE = 3_000
 export const BROKER_DELTA = 12_000
 
+/** 실시간 환율 반영 여부 — 데모 패널 표시용 */
+export const fxLive = { on: false, asOf: '' }
+
+/** /api/fx 에서 받은 실제 환율로 FX 값을 덮어쓴다.
+   화면들이 FX[통화]를 동기적으로 읽으므로, 객체를 그 자리에서 갱신해
+   컴포넌트 구조를 바꾸지 않고 실값으로 전환한다. 실패하면 목값을 그대로 쓴다. */
+export async function loadLiveFx(): Promise<void> {
+  try {
+    const r = await fetch('/api/fx', { signal: AbortSignal.timeout(6000) })
+    if (!r.ok) return
+    const d = (await r.json()) as {
+      asOf: string
+      rates: Array<{ quote: Currency; rate: number; rateText: string; baseline90d: number }>
+    }
+    if (!Array.isArray(d.rates)) return
+    for (const q of d.rates) {
+      const f = FX[q.quote]
+      if (!f || typeof q.rate !== 'number') continue
+      f.rate = q.rate
+      f.avg3m = q.baseline90d
+      f.rateText = q.rateText
+    }
+    fxLive.on = true
+    fxLive.asOf = d.asOf
+  } catch {
+    /* 네트워크·API 실패 시 목 환율 유지 — 데모가 멈추지 않게 */
+  }
+}
+
 export function fxAdvantagePct(cur: Currency): string {
   const f = FX[cur]
   return (((f.rate - f.avg3m) / f.avg3m) * 100).toFixed(1)

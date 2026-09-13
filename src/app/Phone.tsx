@@ -106,16 +106,71 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
     return { who: 'agent', text: t('chat.fallback') }
   }
 
-  const send = (raw?: string) => {
+  /** LLM 응답을 화면 액션으로 변환 — 실행은 항상 확인 화면을 거친다 (AG-3) */
+  const toMsg = (r: { text: string; action?: string; amount?: number | null }): ChatMsg => {
+    switch (r.action) {
+      case 'remit': {
+        const amt = r.amount ?? state.proposal?.amount ?? 600_000
+        return { who: 'agent', text: r.text, action: { label: t('chat.goRemit'), screen: 'B2', amount: amt } }
+      }
+      case 'record':
+        return { who: 'agent', text: r.text, action: { label: t('chat.goRecord'), screen: 'C1' } }
+      case 'loan':
+        return state.creditReady || p.monthsToCredit <= 0
+          ? { who: 'agent', text: r.text, action: { label: t('chat.goLoan'), screen: 'D1' } }
+          : { who: 'agent', text: r.text, action: { label: t('chat.goRecord'), screen: 'C1' } }
+      case 'help':
+        return { who: 'agent', text: r.text, action: { label: t('help.human'), screen: 'HELP', escalate: true } }
+      default:
+        return { who: 'agent', text: r.text }
+    }
+  }
+
+  const send = async (raw?: string) => {
     const text = (raw ?? draftText).trim()
     if (!text || typing) return
     setDraftText('')
     setMsgs((m) => [...m, { who: 'user', text }])
     setTyping(true)
-    setTimeout(() => {
+
+    const offer = loanOffer(p, state.sessionRemits)
+    try {
+      const res = await fetch('/api/agent', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        signal: AbortSignal.timeout(15_000),
+        body: JSON.stringify({
+          message: text,
+          lang: state.lang ?? 'ko',
+          // 수치는 전부 여기서 넘긴 값만 쓰게 한다 (AG-4)
+          ctx: {
+            name: p.name,
+            currency: p.currency,
+            salary: p.salary,
+            balance: state.balance,
+            sentThisMonth: state.sentThisMonth,
+            livingFloor: state.livingFloor,
+            fxRate: fx.rate,
+            fxRateText: fx.rateText,
+            fxAdvantagePct: Number(fxAdvantagePct(p.currency)),
+            monthsEmployed: p.monthsEmployed,
+            remitCount: p.remitCount + state.sessionRemits,
+            monthsToCredit: p.monthsToCredit,
+            creditReady: state.creditReady || p.monthsToCredit <= 0,
+            loanLimit: offer.limit,
+            loanRate: offer.rate,
+            proposalAmount: state.proposal?.amount,
+          },
+        }),
+      })
+      const d = await res.json()
+      setTyping(false)
+      // 서버가 가드레일에 걸리거나 실패하면 fallback 플래그가 온다 → 규칙 기반 응답
+      setMsgs((m) => [...m, d?.text ? toMsg(d) : reply(text)])
+    } catch {
       setTyping(false)
       setMsgs((m) => [...m, reply(text)])
-    }, 650)
+    }
   }
 
   const runAction = (a: NonNullable<ChatMsg['action']>) => {

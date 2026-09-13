@@ -223,9 +223,11 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .screen[data-lang='ne'] .h1 { line-height: 1.5; }
 .lead { color: var(--app-muted); font-size: 15px; margin: 0 0 16px; }
 
+/* PNG가 이미 둥근 배지 + 투명 모서리 → border-radius로 또 깎으면 O·A가 잘린다.
+   그림자도 박스가 아니라 알파를 따라가도록 drop-shadow 사용. */
 .logoHero {
-  display: block; border-radius: 22px; margin: 30px 0 12px;
-  box-shadow: 0 12px 30px rgba(12,161,131,.28);
+  display: block; margin: 30px 0 12px;
+  filter: drop-shadow(0 10px 22px rgba(12,161,131,.32));
   animation: pop .5s cubic-bezier(.2,1.4,.4,1);
 }
 .brandTitle { font-size: 40px; font-weight: 800; letter-spacing: -.02em; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; }
@@ -744,9 +746,10 @@ button.item:active { background: var(--app-primary-tint); }
 .imLogo { height: 27px; width: auto; flex: none; display: block; }
 .splashX { width: 15px; height: 15px; flex: none; color: #fff; opacity: .6; }
 .onnaLogo { display: flex; align-items: center; gap: 7px; flex: none; }
+/* 배지 PNG의 투명 모서리를 살리고, 링/그림자도 알파를 따라가게 */
 .onnaLogo img {
-  width: 30px; height: 30px; border-radius: 9px; display: block; flex: none;
-  box-shadow: 0 0 0 2px rgba(255,255,255,.55);
+  width: 30px; height: 30px; display: block; flex: none;
+  filter: drop-shadow(0 0 1px rgba(255,255,255,.9)) drop-shadow(0 2px 5px rgba(0,0,0,.18));
 }
 .onnaLogo b {
   font-family: 'Fredoka', var(--sans); font-weight: 600;

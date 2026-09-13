@@ -20,7 +20,7 @@ export function B0() {
       <div className="date">{t('b0.date')}</div>
       <div className="push">
         <div className="app">
-          <Logo size={20} radius={6} />
+          <Logo size={20} />
           <b className="wmk">ONNA</b>{t('b0.app').replace('ONNA', '')}
         </div>
         <div className="msg">{t('b0.push', { salary: krw(p.salary), amount: krw(amount) })}</div>

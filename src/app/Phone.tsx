@@ -146,7 +146,7 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
           // 수치는 전부 여기서 넘긴 값만 쓰게 한다 (AG-4)
           ctx: {
             name: p.name,
-            currency: p.currency,
+            homeCurrency: p.currency,
             salary: p.salary,
             balance: state.balance,
             sentThisMonth: state.sentThisMonth,

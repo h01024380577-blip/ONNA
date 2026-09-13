@@ -83,6 +83,7 @@ const vi = {
   'a6.shareTitle': 'Gửi kèm lời nhắn tiếng Hàn cho ông chủ',
   'a6.kakao': 'KakaoTalk',
   'a6.copied': 'Đã sao chép',
+  'a6.sent': 'Đã gửi qua {channel}. Ông chủ có thể xem trên màn hình của mình.',
 
   'b0.app': 'ONNA · bây giờ',
   'b0.date': 'Thứ 6, 25/9/2026',
@@ -192,6 +193,11 @@ const vi = {
   'b6.expire': 'Liên kết này hết hạn sau 30 ngày.',
   'b6.empty': 'Chưa có trang nhận tiền. Trang sẽ hiện ở đây sau khi chuyển tiền xong trên ứng dụng người lao động.',
   'b6.arrived': 'Đã đến nơi',
+
+  'fam.empty': 'Chưa có tin nhắn nào. Tin sẽ đến đây khi người nhà gửi tiền xong.',
+  'fam.msgShared': '{name} đã gửi cho bạn {amount}. Hãy xem ở liên kết bên dưới.',
+  'fam.msgArrived': 'Tiền đã đến {bank}. Bạn có thể xem lại ở liên kết.',
+  'fam.linkTitle': 'Trang xác nhận nhận tiền',
 
   'b7.title': 'Mỗi tháng gửi thế này',
   'b7.lead': 'Quy tắc chỉ đề xuất. Trước khi gửi luôn hỏi, bạn duyệt mới gửi.',

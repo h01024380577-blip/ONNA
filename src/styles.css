@@ -805,7 +805,64 @@ button.item:active { background: var(--app-primary-tint); }
 .tl .tlRow span small { display: block; color: var(--app-muted); font-size: 12.5px; font-weight: 400; }
 
 .web { background: var(--app-card); flex: 1; display: flex; flex-direction: column; overflow: auto; }
-.urlbar { background: var(--app-bg); margin: 10px 16px 4px; border-radius: 10px; padding: 8px 13px; font-size: 12px; color: var(--app-muted); font-family: var(--mono); flex: none; }
+.urlbar {
+  background: var(--app-bg); margin: 10px 16px 4px; border-radius: 10px; padding: 8px 13px;
+  font-size: 12px; color: var(--app-muted); font-family: var(--mono); flex: none;
+  display: flex; align-items: center; gap: 8px; min-width: 0;
+}
+.urlbar span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.urlBack {
+  flex: none; width: 24px; height: 24px; border: 0; padding: 0; border-radius: 7px;
+  background: var(--app-card); color: var(--app-ink);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ---------- 가족 화면 — 메신저로 받은 메시지함 ---------- */
+.famScreen { background: #e8ebef; }
+.screen.dark.famScreen { background: #141a1d; }
+.famHead {
+  flex: none; display: flex; align-items: center; gap: 10px;
+  padding: 8px 18px 12px; background: var(--app-card);
+  border-bottom: 1px solid var(--app-line);
+}
+.famAvat {
+  width: 36px; height: 36px; flex: none; border-radius: 50%;
+  background: var(--app-primary-tint); color: var(--app-primary-press);
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+}
+.famWho { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.famWho b { font-size: 15.5px; }
+.famWho small { font-size: 12px; color: var(--app-muted); }
+.famBody { flex: 1; overflow: auto; padding: 16px 16px 24px; display: flex; flex-direction: column; gap: 14px; }
+.famEmpty { margin: auto 0; text-align: center; color: var(--app-muted); font-size: 14.5px; line-height: 1.6; }
+/* 받은 메시지 말풍선 — 왼쪽 정렬 */
+.famMsg { max-width: 86%; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.famText {
+  margin: 0; background: var(--app-card); color: var(--app-ink);
+  border-radius: 4px 16px 16px 16px; padding: 11px 14px; font-size: 14.5px; line-height: 1.5;
+  box-shadow: 0 1px 2px rgba(0,0,0,.06);
+}
+/* 안읽음은 시각 옆 점으로만 — 말풍선에 테두리를 두르면 경고처럼 보인다 */
+.famMsg.unread .famTime::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--app-agent); margin-right: 5px; vertical-align: 1px;
+}
+.famLink {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: var(--app-card); border: 1px solid var(--app-line); border-radius: 14px;
+  padding: 10px 12px; color: var(--app-ink); font: inherit;
+}
+.famLink:active { background: var(--app-primary-tint); }
+.famLinkIco {
+  width: 38px; height: 38px; flex: none; border-radius: 10px;
+  background: var(--app-primary-tint);
+  display: flex; align-items: center; justify-content: center;
+}
+.famLinkIco .wmk { font-size: 10px; letter-spacing: .04em; }
+.famLinkTxt { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 1px; }
+.famLinkTxt b { font-size: 13.5px; }
+.famLinkTxt small { font-size: 11px; color: var(--app-muted); font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.famTime { font-size: 11px; color: var(--app-muted); }
 .webBody { padding: 10px 22px 24px; font-size: 16px; }
 .webBody .h1 { font-size: 23px; }
 
@@ -855,6 +912,68 @@ button.item:active { background: var(--app-primary-tint); }
 .opsApprove:disabled { background: #cfe4db; color: #5e8577; }
 .empApprove { width: 100%; border: 0; background: #0ca183; color: #fff; border-radius: 12px; padding: 15px; font-size: 16px; font-weight: 700; margin-top: 16px; }
 .empDone { background: #e1f3e9; color: #178a5c; border-radius: 12px; padding: 15px; text-align: center; font-weight: 700; margin-top: 16px; }
+
+/* A6 — 사장님께 계좌를 보낸 뒤의 확인 문구 (앱 화면이라 앱 팔레트를 쓴다) */
+.sentNote {
+  display: flex; align-items: center; gap: 7px; margin-top: 10px;
+  background: var(--app-ok-tint); color: var(--app-ok);
+  border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 600;
+}
+.sentNote svg { flex: none; }
+
+/* 사장님 화면 알림함 — 알림 목록 + 고른 알림만 아래에 펼친다 */
+.empCard .notiBar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 24px; font-size: 12.5px; font-weight: 600; color: #61716b;
+  background: #f5f8f6; border-bottom: 1px solid #e6ebe7;
+}
+.notiNew {
+  font-style: normal; font-size: 11.5px; font-weight: 700;
+  background: #e8960f; color: #fff; border-radius: 999px; padding: 2px 9px;
+}
+.notiList { display: flex; flex-direction: column; }
+.notiItem {
+  display: flex; align-items: flex-start; gap: 12px; width: 100%; text-align: left;
+  padding: 14px 24px; border: 0; border-bottom: 1px solid #eef2ef;
+  background: #fff; color: inherit; font: inherit;
+}
+.notiItem:hover { background: #f7faf8; }
+.notiItem.on { background: #f2f8f5; box-shadow: inset 3px 0 0 #0ca183; }
+.notiIco {
+  width: 34px; height: 34px; flex: none; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.notiIco.verify { background: #e1f3e9; color: #178a5c; }
+.notiIco.account { background: #fdf3df; color: #8a5a10; }
+.notiTxt { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.notiTxt b { font-size: 14.5px; }
+.notiItem.unread .notiTxt b::after {
+  content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: #e8960f; margin-left: 6px; vertical-align: 2px;
+}
+.notiPrev { font-size: 13px; color: #61716b; overflow-wrap: break-word; }
+.notiMeta { font-size: 11.5px; color: #93a49e; }
+.notiTag {
+  flex: none; align-self: center; font-size: 11.5px; font-weight: 700;
+  border-radius: 999px; padding: 4px 10px; white-space: nowrap;
+}
+.notiTag.todo { background: #fdf3df; color: #8a5a10; }
+.notiTag.done { background: #eef2ef; color: #61716b; }
+.notiDetail { border-top: 1px solid #e6ebe7; }
+/* 급여계좌 — 사장님이 옮겨 적을 일 없이 한눈에 */
+.acctBox {
+  background: #f5f8f6; border: 1px solid #e6ebe7; border-radius: 14px;
+  padding: 14px 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 2px;
+}
+.acctBank { font-size: 12.5px; color: #61716b; font-weight: 600; }
+.acctNo { font-family: var(--mono); font-size: 24px; font-weight: 600; letter-spacing: .02em; }
+.acctOwner { font-size: 13px; color: #61716b; }
+.empNote { margin: 14px 0 0; font-size: 13px; color: #61716b; }
+/* 좁은 화면(폰 안의 사장님 화면)에서는 여백을 줄인다 */
+@media (max-width: 520px) {
+  .empCard .notiBar, .notiItem, .deskCard .dcBody { padding-left: 16px; padding-right: 16px; }
+  .notiTag { display: none; }
+}
 
 .emptyNote { color: var(--desk-muted); font-size: 14px; text-align: center; }
 

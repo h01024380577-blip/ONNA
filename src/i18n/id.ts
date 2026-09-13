@@ -83,6 +83,7 @@ const id = {
   'a6.shareTitle': 'Dikirim dengan catatan bahasa Korea untuk bos',
   'a6.kakao': 'KakaoTalk',
   'a6.copied': 'Tersalin',
+  'a6.sent': 'Terkirim lewat {channel}. Bos bisa melihatnya di layarnya.',
 
   'b0.app': 'ONNA · sekarang',
   'b0.date': 'Jum, 25 Sep 2026',
@@ -192,6 +193,11 @@ const id = {
   'b6.expire': 'Tautan ini hangus setelah 30 hari.',
   'b6.empty': 'Belum ada halaman penerimaan. Halaman ini muncul setelah kiriman selesai di aplikasi pekerja.',
   'b6.arrived': 'Sudah tiba',
+
+  'fam.empty': 'Belum ada pesan. Pesan akan masuk ke sini setelah keluarga selesai mengirim.',
+  'fam.msgShared': '{name} mengirim {amount} untuk Anda. Cek lewat tautan di bawah.',
+  'fam.msgArrived': 'Sudah sampai di {bank}. Anda bisa cek lagi lewat tautan.',
+  'fam.linkTitle': 'Halaman konfirmasi',
 
   'b7.title': 'Tiap bulan kirim seperti ini',
   'b7.lead': 'Aturan hanya memberi usulan. Selalu ditanya dulu — dikirim setelah Anda setujui.',

@@ -33,6 +33,9 @@ export type Action =
   | { type: 'SHARE_FAMILY'; channel: string }
   | { type: 'RULE_SAVE' }
   | { type: 'EMPLOYER_APPROVE' }
+  | { type: 'SHARE_ACCOUNT'; channel: 'kakao' | 'sms' }
+  | { type: 'EMPLOYER_READ_ACCOUNT' }
+  | { type: 'FAMILY_READ'; kind: 'shared' | 'arrived' }
   | { type: 'SET_SCENARIO'; scenario: Scenario }
   | { type: 'TOGGLE_DARK' }
   | { type: 'ESCALATE'; reason: string }
@@ -46,6 +49,8 @@ function ev(s: AppState, name: string, data?: string): AppState['events'] {
 
 export function initialState(persona: PersonaId, startAt: 'onboarding' | 'home'): AppState {
   const p = PERSONAS[persona]
+  // acctNo()는 매번 다른 번호를 만든다 — 계좌번호가 쓰이는 곳이 여러 군데라 한 번만 뽑는다
+  const acct = startAt === 'home' ? acctNo() : undefined
   const base: AppState = {
     personaId: persona,
     lang: startAt === 'home' ? p.lang : null,
@@ -58,10 +63,15 @@ export function initialState(persona: PersonaId, startAt: 'onboarding' | 'home')
       faceOk: startAt === 'home',
       employer: startAt === 'home' ? 'pending' : 'none',
       consents: { salary: true, remit: true, employment: true },
-      accountNo: startAt === 'home' ? acctNo() : undefined,
+      accountNo: acct,
       startedAt: startAt === 'onboarding' ? Date.now() : undefined,
       completedAt: startAt === 'home' ? Date.now() : undefined,
     },
+    // 홈에서 시작 = 온보딩을 이미 마친 상태 → 급여계좌도 이미 보낸 것으로 둔다(읽음)
+    accountShare:
+      startAt === 'home'
+        ? { at: Date.now(), channel: 'kakao', acct: acct!, read: true }
+        : undefined,
     livingFloor: 1_000_000,
     balance: 320_000,
     sentThisMonth: 0,
@@ -340,7 +350,7 @@ export function reducer(s: AppState, a: Action): AppState {
       if (!s.tx || s.tx.status !== 'processing') return s
       return {
         ...s,
-        tx: { ...s.tx, status: 'arrived' },
+        tx: { ...s.tx, status: 'arrived', arrivedAt: Date.now() },
         trace: trace(s, 'orchestrator', '상태 웹훅: 수취 은행 도착 → 가족 페이지 갱신 + 도착 푸시'),
       }
     }
@@ -349,7 +359,7 @@ export function reducer(s: AppState, a: Action): AppState {
       if (!s.tx) return s
       return {
         ...s,
-        tx: { ...s.tx, sharedVia: a.channel },
+        tx: { ...s.tx, sharedVia: a.channel, sharedAt: Date.now() },
         events: ev(s, 'family_share', `channel=${a.channel}`),
         trace: trace(s, 'orchestrator', `가족 알림 공유 — ${a.channel} · 수취인 언어(${p.lang}) 수령 페이지 링크`),
       }
@@ -371,6 +381,27 @@ export function reducer(s: AppState, a: Action): AppState {
         trace: trace(s, 'record-svc', '재직 확인 발급 (발급자: 고용주 서명) · 해시 앵커링 — 재직 기록 집계 시작'),
         events: ev(s, 'employer_verified'),
       }
+
+    /* A6 — 근로자가 급여계좌를 사장님께 보낸다. 사장님 화면의 알림함에 새 알림으로 쌓인다.
+       재직 확인 요청과는 별개의 알림이라 상태도 따로 둔다. */
+    case 'SHARE_ACCOUNT': {
+      const acct = s.onboarding.accountNo
+      if (!acct) return s
+      return {
+        ...s,
+        accountShare: { at: Date.now(), channel: a.channel, acct, read: false },
+        events: ev(s, 'account_shared', `channel=${a.channel}`),
+        trace: trace(s, 'orchestrator', `급여계좌 안내 발송 → 사장님 (${a.channel === 'kakao' ? '카카오톡' : 'SMS'})`),
+      }
+    }
+
+    case 'FAMILY_READ':
+      if (s.familyRead?.[a.kind]) return s
+      return { ...s, familyRead: { ...s.familyRead, [a.kind]: true } }
+
+    case 'EMPLOYER_READ_ACCOUNT':
+      if (!s.accountShare || s.accountShare.read) return s
+      return { ...s, accountShare: { ...s.accountShare, read: true } }
 
     case 'SET_SCENARIO':
       return { ...s, scenario: a.scenario, trace: trace(s, 'app', `시나리오 변경: ${a.scenario}`) }

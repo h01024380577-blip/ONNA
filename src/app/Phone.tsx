@@ -43,6 +43,11 @@ function parseAmount(s: string): number | null {
   return digits ? parseInt(digits[0], 10) : null
 }
 
+/* 로딩 화면은 세션당 한 번만. 화면 탭(근로자/사장님/가족)을 오갈 때마다 WorkerPhone이
+   다시 마운트되는데, 그때마다 재생되면 시연 중 매번 3초를 기다리게 된다.
+   '첫 온보딩 화면으로'는 'onna:splash' 이벤트로 명시적으로 다시 재생시킨다. */
+let splashPlayed = false
+
 type ChatMsg = {
   who: 'agent' | 'user'
   text: string
@@ -55,7 +60,7 @@ export function WorkerPhone({ idFailMode }: { idFailMode: boolean }) {
   const { state, dispatch, p, t, krw, local } = useApp()
   const fx = FX[p.currency]
   // 앱 진입 로딩 화면 — 폰 화면 안에서만 표시. 'onna:splash' 이벤트로 재생
-  const [splash, setSplash] = useState(true)
+  const [splash, setSplash] = useState(!splashPlayed)
   const [chatOpen, setChatOpen] = useState(false)
   const [msgs, setMsgs] = useState<ChatMsg[]>([])
   const [typing, setTyping] = useState(false)
@@ -64,7 +69,7 @@ export function WorkerPhone({ idFailMode }: { idFailMode: boolean }) {
 
   useEffect(() => {
     const open = () => setChatOpen(true)
-    const replay = () => setSplash(true)
+    const replay = () => { splashPlayed = false; setSplash(true) }
     window.addEventListener('onna:chat', open)
     window.addEventListener('onna:splash', replay)
     return () => {
@@ -267,7 +272,7 @@ export function WorkerPhone({ idFailMode }: { idFailMode: boolean }) {
           </div>
         )}
 
-        {splash && <Splash onDone={() => setSplash(false)} />}
+        {splash && <Splash onDone={() => { splashPlayed = true; setSplash(false) }} />}
       </div>
   )
 

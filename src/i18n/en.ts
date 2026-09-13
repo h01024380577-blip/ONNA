@@ -83,6 +83,7 @@ const en = {
   'a6.shareTitle': 'Sent with a Korean note for your boss',
   'a6.kakao': 'KakaoTalk',
   'a6.copied': 'Copied',
+  'a6.sent': 'Sent via {channel}. Your boss can see it on their screen.',
 
   'b0.app': 'ONNA · now',
   'b0.date': 'Fri, Sep 25, 2026',
@@ -192,6 +193,11 @@ const en = {
   'b6.expire': 'This link expires in 30 days.',
   'b6.empty': 'No receipt page yet. It appears here once a transfer is completed in the worker app.',
   'b6.arrived': 'Arrived',
+
+  'fam.empty': 'No message yet. It will arrive here once your family finishes the transfer.',
+  'fam.msgShared': '{name} sent you {amount}. Check it with the link below.',
+  'fam.msgArrived': 'It has arrived at {bank}. You can check again with the link.',
+  'fam.linkTitle': 'Receipt page',
 
   'b7.title': 'Send like this every month',
   'b7.lead': 'Rules only make suggestions. I always ask before sending — nothing goes out without your approval.',

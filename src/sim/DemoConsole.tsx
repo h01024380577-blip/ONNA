@@ -10,11 +10,18 @@ import type { PersonaId, Scenario } from '../types'
 
 export type View = 'worker' | 'employer' | 'family'
 
+/** 가족 화면에서 아직 열어보지 않은 메시지 수 — 탭 배지 기준 (데스크톱·⚙ 콘솔 공용) */
+export function familyUnread(s: { tx?: { status: string; sharedVia?: string }; familyRead?: { shared?: boolean; arrived?: boolean } }): number {
+  const tx = s.tx
+  if (!tx || tx.status === 'cancelled' || !tx.sharedVia) return 0
+  return (s.familyRead?.shared ? 0 : 1) + (tx.status === 'arrived' && !s.familyRead?.arrived ? 1 : 0)
+}
+
 /* 탭 순서 = 이야기 순서: 근로자가 신청 → 사장님이 확인 → 가족이 받는다 */
 export const VIEWS: Array<{ id: View; label: string }> = [
   { id: 'worker', label: '근로자 앱' },
-  { id: 'employer', label: '사장님 승인' },
-  { id: 'family', label: '가족 페이지' },
+  { id: 'employer', label: '사장님 화면' },
+  { id: 'family', label: '가족 화면' },
 ]
 
 const SCENARIOS: Array<{ id: Scenario; label: string; warn?: boolean }> = [
@@ -42,6 +49,14 @@ export function DemoConsole({
   const { state, dispatch } = useStore()
   const hasAccount = !!state.onboarding.accountNo
 
+  // 그 화면에서 확인할 일이 몇 건인지 — 데스크톱 탭 배지와 같은 기준
+  const unread: Partial<Record<View, number>> = {
+    employer:
+      (state.onboarding.employer === 'pending' ? 1 : 0) +
+      (state.accountShare && !state.accountShare.read ? 1 : 0),
+    family: familyUnread(state),
+  }
+
   const pick = (fn: () => void) => () => { fn(); onPick?.() }
 
   return (
@@ -61,7 +76,9 @@ export function DemoConsole({
       <div className="pillRow">
         {VIEWS.map((v) => (
           <button key={v.id} className={`pill ${view === v.id ? 'on' : ''}`}
-            onClick={pick(() => setView(v.id))}>{v.label}</button>
+            onClick={pick(() => setView(v.id))}>
+            {v.label}{unread[v.id] ? ` (${unread[v.id]})` : ''}
+          </button>
         ))}
       </div>
 

@@ -5,7 +5,7 @@ import { NATION_BY_PERSONA, PERSONAS } from '../mock/personas'
 import { WorkerPhone } from '../app/Phone'
 import { FamilyPhone } from '../web/FamilyPhone'
 import { EmployerCard } from '../web/Desk'
-import { DemoConsole, VIEWS, type View } from './DemoConsole'
+import { DemoConsole, VIEWS, familyUnread, type View } from './DemoConsole'
 import { DeviceFrame } from './DeviceFrame'
 
 /* 데스크톱 시뮬레이터 — 스테이지(기기) + 우측 데모 콘솔.
@@ -13,8 +13,8 @@ import { DeviceFrame } from './DeviceFrame'
 
 const HINT: Record<View, string> = {
   worker: '화면 속 버튼으로 실제 흐름이 진행됩니다 · 급여 입금은 오른쪽 콘솔에서 트리거',
-  employer: '카카오톡 링크 1탭 승인, 급여는 보이지 않습니다',
-  family: '수취인 언어로 열리는 링크 — 앱 설치가 필요 없습니다',
+  employer: '근로자가 보낸 알림이 한 건씩 쌓입니다 · 재직 확인은 1탭, 급여는 보이지 않습니다',
+  family: '근로자가 메신저로 보낸 메시지 → 링크를 눌러야 수령 페이지가 열립니다 · 앱 설치 불필요',
 }
 
 export function Shell() {
@@ -27,10 +27,13 @@ export function Shell() {
 
   const p = PERSONAS[state.personaId]
 
-  // 탭 옆 알림 배지 — 그 화면에서 확인할 일이 생겼을 때만
-  const badge: Partial<Record<View, boolean>> = {
-    employer: state.onboarding.employer === 'pending',
-    family: !!state.tx && state.tx.status !== 'cancelled',
+  // 탭 옆 알림 배지 — 그 화면에서 확인할 일이 몇 건 있는지
+  const employerUnread =
+    (state.onboarding.employer === 'pending' ? 1 : 0) +
+    (state.accountShare && !state.accountShare.read ? 1 : 0)
+  const badge: Partial<Record<View, number>> = {
+    employer: employerUnread,
+    family: familyUnread(state),
   }
 
   return (
@@ -40,7 +43,7 @@ export function Shell() {
         <nav className="viewTabs">
           {VIEWS.map((v) => (
             <button key={v.id} className={view === v.id ? 'on' : ''} onClick={() => setView(v.id)}>
-              {v.label}{badge[v.id] ? <span className="n">1</span> : null}
+              {v.label}{badge[v.id] ? <span className="n">{badge[v.id]}</span> : null}
             </button>
           ))}
         </nav>

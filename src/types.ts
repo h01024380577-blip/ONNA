@@ -111,7 +111,16 @@ export interface AppState {
     cancelUntil: number
     status: 'processing' | 'arrived' | 'cancelled'
     sharedVia?: string
+    /** 공유·도착 시각 — 가족 화면 메시지함의 수신 시각으로 쓴다 */
+    sharedAt?: number
+    arrivedAt?: number
   }
+
+  /** 가족 화면에서 아직 열어보지 않은 메시지 추적 — 탭 배지용 */
+  familyRead?: { shared?: boolean; arrived?: boolean }
+
+  /** A6에서 근로자가 사장님께 보낸 급여계좌 안내 — 사장님 화면 알림함에 뜬다 */
+  accountShare?: { at: number; channel: 'kakao' | 'sms'; acct: string; read: boolean }
 
   rule: null | { amount: number; fxMin: string; floor: number }
 

@@ -356,6 +356,7 @@ export function A6() {
   const { state, dispatch, p, t } = useApp()
   const [shareOpen, setShareOpen] = useState(false)
   const acct = state.onboarding.accountNo ?? '508-12-000000'
+  const sent = state.accountShare?.channel
   return (
     <>
       <div className="appBody">
@@ -383,10 +384,18 @@ export function A6() {
                 사장님, 안녕하세요. {p.fullName}입니다. 급여계좌가 만들어졌어요.
                 아래 계좌로 급여를 보내 주세요. iM뱅크 {acct}
               </p>
-              <div className="row" style={{ marginTop: 8 }}>
-                <button className="btn ghost sm">{t('a6.kakao')}</button>
-                <button className="btn ghost sm">SMS</button>
-              </div>
+              {/* 보내면 사장님 화면 알림함에 '급여계좌 안내'가 새 알림으로 뜬다 */}
+              {sent ? (
+                <div className="sentNote">
+                  <Icon name="check" size={15} strokeWidth={2.4} />
+                  <span>{t('a6.sent', { channel: sent === 'kakao' ? t('a6.kakao') : 'SMS' })}</span>
+                </div>
+              ) : (
+                <div className="row" style={{ marginTop: 8 }}>
+                  <button className="btn ghost sm" onClick={() => dispatch({ type: 'SHARE_ACCOUNT', channel: 'kakao' })}>{t('a6.kakao')}</button>
+                  <button className="btn ghost sm" onClick={() => dispatch({ type: 'SHARE_ACCOUNT', channel: 'sms' })}>SMS</button>
+                </div>
+              )}
             </div>
           )}
         </div>

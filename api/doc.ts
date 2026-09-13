@@ -1,4 +1,4 @@
-import { json, bad, openai, parseJson, copyLint, maskPii, rateLimit, clientIp } from './_lib'
+import { json, bad, openai, parseJson, copyLint, maskPii, rateLimit, clientIp, MODEL_VISION } from './_lib'
 
 export const config = { runtime: 'edge' }
 
@@ -61,6 +61,7 @@ export default async function handler(req: Request) {
   try {
     const d = await openai(
       {
+        model: MODEL_VISION,
         max_tokens: 700,
         temperature: 0.1,
         response_format: { type: 'json_object' },

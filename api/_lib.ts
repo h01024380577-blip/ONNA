@@ -1,6 +1,11 @@
 /* 서버 공통 유틸 — API 키는 서버에만 존재하고 브라우저로 나가지 않는다 */
 
-export const MODEL = 'gpt-4o-mini' // 채팅·비전 공용, 가장 비용 효율적
+/* 모델 선택 근거 (실측, 같은 이미지 기준)
+   - 텍스트 대화: gpt-4o-mini 가 입력 $0.15/1M 로 가장 저렴
+   - 이미지 판독: gpt-4o-mini 는 이미지 토큰을 과도하게 잡아(448 → 14,230 토큰)
+     오히려 8.5배 비싸고 빽빽한 표에서 더 부정확 → gpt-4.1-mini 사용 */
+export const MODEL_CHAT = 'gpt-4o-mini'
+export const MODEL_VISION = 'gpt-4.1-mini'
 
 export const json = (data: unknown, status = 200, cacheSec = 0) =>
   new Response(JSON.stringify(data), {
@@ -25,7 +30,7 @@ export async function openai(body: Record<string, unknown>, timeoutMs = 25_000) 
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, ...body }),
+      body: JSON.stringify({ model: MODEL_CHAT, ...body }),
       signal: ctl.signal,
     })
     const d = await r.json()

@@ -9,6 +9,9 @@ interface FxInfo {
   fxMinText: string // 정기송금 규칙의 환율 조건 표기
   etaKey: 'evening' | 'hour1' | 'morning'
   cancelMin: number // RM-10: 파트너망이 즉시 확정이면 0
+  /** avg3m이 실제 90일 평균이면 true, 고정 기준선이면 false.
+     화면에 "무엇 대비" 유리한지 정직하게 표기하려고 들고 다닌다 */
+  avgReal?: boolean
 }
 
 export const FX: Record<Currency, FxInfo> = {
@@ -32,7 +35,13 @@ export async function loadLiveFx(): Promise<void> {
     if (!r.ok) return
     const d = (await r.json()) as {
       asOf: string
-      rates: Array<{ quote: Currency; rate: number; rateText: string; baseline90d: number }>
+      rates: Array<{
+        quote: Currency
+        rate: number
+        rateText: string
+        baseline90d: number
+        baselineSource?: string
+      }>
     }
     if (!Array.isArray(d.rates)) return
     for (const q of d.rates) {
@@ -41,6 +50,7 @@ export async function loadLiveFx(): Promise<void> {
       f.rate = q.rate
       f.avg3m = q.baseline90d
       f.rateText = q.rateText
+      f.avgReal = q.baselineSource === 'koreaexim-90d'
     }
     fxLive.on = true
     fxLive.asOf = d.asOf

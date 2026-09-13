@@ -57,6 +57,8 @@ function FxBlock() {
         rateText: fx.rateText,
         advantagePct: pct,
         sampleText,
+        // 기준선이 실제 90일 평균인지 고정값인지 알려야 문장이 과장되지 않는다
+        basis: fx.avgReal ? '90d-average' : 'reference',
       }),
     })
       .then((r) => r.json())
@@ -84,6 +86,8 @@ function FxBlock() {
       </div>
       <div className="fxRate">₩1 = <b>{fx.rateText}</b></div>
       <div className="fxSample">{t('fx.sample', { local: sampleText })}</div>
+      {/* 증감률이 "무엇 대비"인지 명시 — 통화마다 기준선 출처가 다르다 */}
+      <div className="fxBasis">{fx.avgReal ? t('fx.basisReal') : t('fx.basisFixed')}</div>
       <div className="fxBrief">
         <Logo size={17} />
         <span>{brief ?? template}</span>

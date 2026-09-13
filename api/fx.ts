@@ -15,52 +15,94 @@ const FMT: Record<Quote, (r: number) => string> = {
   VND: (r) => `${r.toFixed(1)}₫`.replace('.', ','),
 }
 
-/** 3개월 평균 대비 우위 계산에 쓰는 기준선.
-   과거 시계열 적재(Cron+KV) 전까지는 보수적인 고정 기준선을 쓰고,
-   출처를 baseline으로 명시해 과장하지 않는다 */
-const BASELINE_90D: Record<Quote, number> = { IDR: 12.88, NPR: 0.1118, VND: 18.92 }
+/** 기준선을 과거 실값으로 못 구할 때 쓰는 보수적 고정값.
+   수출입은행 고시 통화(IDR)는 실제 90일 평균으로 대체되고,
+   미지원 통화(NPR·VND)는 과거 시세를 주는 무료 소스가 없어 이 값을 그대로 쓴다. */
+const BASELINE_FIXED: Record<Quote, number> = { IDR: 12.88, NPR: 0.1118, VND: 18.92 }
+
+/** 기준선 출처 — 화면에 "무엇 대비"인지 정직하게 표기하기 위해 함께 내려보낸다 */
+type BaselineSource = 'koreaexim-90d' | 'fixed'
+
+const EXIM_KEY = () => process.env.KOREAEXIM_FX_KEY ?? process.env.KOREAEXIM_API_KEY
+
+const ymdOf = (d: Date) => d.toISOString().slice(0, 10).replace(/-/g, '')
+
+/** 수출입은행 고시환율 하루치 → KRW 1원당 외화 맵.
+   휴일·고시 전에는 빈 배열이 오므로 null로 구분한다. */
+async function eximDay(key: string, ymd: string): Promise<Record<string, number> | null> {
+  const r = await fetch(
+    `https://oapi.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${key}&searchdate=${ymd}&data=AP01`,
+    { signal: AbortSignal.timeout(5000) },
+  )
+  if (!r.ok) return null
+  const rows = (await r.json()) as Array<{ cur_unit?: string; deal_bas_r?: string }>
+  if (!Array.isArray(rows) || rows.length === 0) return null
+
+  const rates: Record<string, number> = {}
+  for (const row of rows) {
+    const m = /^([A-Z]{3})(?:\((\d+)\))?$/.exec((row.cur_unit ?? '').trim())
+    if (!m) continue
+    const krwPerUnit = Number((row.deal_bas_r ?? '').replace(/,/g, ''))
+    if (!krwPerUnit) continue
+    const per = Number(m[2] ?? '1') // IDR(100) 처럼 100단위 고시인 통화 보정
+    rates[m[1]] = per / krwPerUnit // KRW 1원당 외화
+  }
+  return Object.keys(rates).length ? rates : null
+}
 
 /* 1차: 한국수출입은행 고시환율(공식). 영업일 11시 이후 당일분이 나오고
-   휴일·시간 이전에는 빈 배열이 오므로 최근 영업일까지 거슬러 조회한다.
-   외화 1단위당 원화(매매기준율)로 주므로 KRW→외화로 뒤집어 쓴다. */
+   휴일·시간 이전에는 빈 배열이 오므로 최근 영업일까지 거슬러 조회한다. */
 async function fromKoreaexim(): Promise<{ rates: Record<string, number>; asOf: string } | null> {
-  const key = process.env.KOREAEXIM_FX_KEY ?? process.env.KOREAEXIM_API_KEY
+  const key = EXIM_KEY()
   if (!key) return null
 
   const kstNow = new Date(Date.now() + 9 * 3600_000)
   for (let back = 0; back < 5; back++) {
-    const d = new Date(kstNow.getTime() - back * 86400_000)
-    const ymd = d.toISOString().slice(0, 10).replace(/-/g, '')
+    const ymd = ymdOf(new Date(kstNow.getTime() - back * 86400_000))
     try {
-      const r = await fetch(
-        `https://oapi.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${key}&searchdate=${ymd}&data=AP01`,
-        { signal: AbortSignal.timeout(5000) },
-      )
-      if (!r.ok) continue
-      const rows = (await r.json()) as Array<{
-        result?: number
-        cur_unit?: string
-        deal_bas_r?: string
-      }>
-      if (!Array.isArray(rows) || rows.length === 0) continue
-
-      const rates: Record<string, number> = {}
-      for (const row of rows) {
-        const unit = row.cur_unit ?? ''
-        const m = /^([A-Z]{3})(?:\((\d+)\))?$/.exec(unit.trim())
-        if (!m) continue
-        const krwPerUnit = Number((row.deal_bas_r ?? '').replace(/,/g, ''))
-        if (!krwPerUnit) continue
-        const per = Number(m[2] ?? '1') // IDR(100) 처럼 100단위 고시인 통화 보정
-        rates[m[1]] = per / krwPerUnit // KRW 1원당 외화
-      }
-      if (Object.keys(rates).length === 0) continue
+      const rates = await eximDay(key, ymd)
+      if (!rates) continue
       return { rates, asOf: `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6)}T11:00:00+09:00` }
     } catch {
       /* 다음 날짜로 계속 */
     }
   }
   return null
+}
+
+/** 최근 90일 실제 평균 — 7일 간격 13개 표본.
+   전 영업일을 다 받으면 호출이 90번이라 주 1회로 솎고, 주말은 직전 금요일로 당긴다.
+   공휴일 등으로 빠지는 날이 있어 표본이 절반 미만이면 평균을 믿지 않고 버린다. */
+async function baseline90d(): Promise<Record<string, number>> {
+  const key = EXIM_KEY()
+  if (!key) return {}
+
+  const kstNow = new Date(Date.now() + 9 * 3600_000)
+  const dates: string[] = []
+  for (let w = 1; w <= 13; w++) {
+    const d = new Date(kstNow.getTime() - w * 7 * 86400_000)
+    const dow = d.getUTCDay() // kstNow가 이미 +9 보정된 값이라 UTC 요일 = KST 요일
+    if (dow === 0) d.setUTCDate(d.getUTCDate() - 2)
+    else if (dow === 6) d.setUTCDate(d.getUTCDate() - 1)
+    dates.push(ymdOf(d))
+  }
+
+  const days = await Promise.all(dates.map((ymd) => eximDay(key, ymd).catch(() => null)))
+  const sums: Record<string, { sum: number; n: number }> = {}
+  for (const day of days) {
+    if (!day) continue
+    for (const [cur, rate] of Object.entries(day)) {
+      const acc = (sums[cur] ??= { sum: 0, n: 0 })
+      acc.sum += rate
+      acc.n += 1
+    }
+  }
+
+  const out: Record<string, number> = {}
+  for (const [cur, { sum, n }] of Object.entries(sums)) {
+    if (n >= 7) out[cur] = sum / n // 13개 중 7개 이상 모였을 때만 채택
+  }
+  return out
 }
 
 /* 2차: 공개 환율 API — 수출입은행 미지원 통화(NPR 등)와 장애 시 보완 */
@@ -107,11 +149,17 @@ export default async function handler(req: Request) {
   if (q && !QUOTES.includes(q)) return bad('unsupported quote')
 
   try {
-    const { rates, asOf, sources } = await fetchRates()
+    const [{ rates, asOf, sources }, real] = await Promise.all([
+      fetchRates(),
+      baseline90d().catch(() => ({} as Record<string, number>)),
+    ])
     const build = (c: Quote) => {
       const rate = rates[c]
       if (typeof rate !== 'number') throw new Error(`missing ${c}`)
-      const base = BASELINE_90D[c]
+      // 과거 실값이 모이는 통화는 실제 90일 평균, 아니면 고정 기준선
+      const hasReal = typeof real[c] === 'number'
+      const base = hasReal ? real[c] : BASELINE_FIXED[c]
+      const baselineSource: BaselineSource = hasReal ? 'koreaexim-90d' : 'fixed'
       // 받는 돈이 많아질수록 유리 → (현재 - 기준선) / 기준선
       const advantagePct = Math.round(((rate - base) / base) * 1000) / 10
       return {
@@ -119,6 +167,7 @@ export default async function handler(req: Request) {
         rate,
         rateText: FMT[c](rate),
         baseline90d: base,
+        baselineSource,
         advantagePct,
         asOf,
         source: sources[c],

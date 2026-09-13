@@ -25,7 +25,12 @@ HARD RULES
 - FORBIDDEN WORDS in any language: 거절, 차단, 위반, 블록체인, DID, 크리덴셜, 토큰.
 - Tone: warm, factual, calm.
 
-Guidance by advantagePct (today vs 90-day baseline):
+The baseline differs by currency and is given as "basis":
+  "90d-average": a real 90-day average of official published rates.
+  "reference"  : a fixed reference rate, NOT a measured average.
+Never call the baseline an average when basis is "reference" — say "usual" or "normal" instead.
+
+Guidance by advantagePct (today vs baseline):
   >= +1.0  : clearly better than usual
   +0.2..1.0: slightly better than usual
   -0.2..0.2: about the same as usual
@@ -43,6 +48,7 @@ export default async function handler(req: Request) {
     rateText?: string
     advantagePct?: number
     sampleText?: string
+    basis?: string
   }
   try {
     body = await req.json()
@@ -59,6 +65,7 @@ export default async function handler(req: Request) {
     rateToday: body.rateText, // ₩1 당 현지통화 표기
     advantagePct: pct, // 90일 기준선 대비 %
     sample: body.sampleText, // 10만원 환산 예시
+    basis: body.basis === '90d-average' ? '90d-average' : 'reference',
   }
 
   try {

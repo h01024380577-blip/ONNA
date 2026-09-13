@@ -222,6 +222,8 @@ const ko = {
   'd1.limit': '가능한 최대 금액',
   'd1.rate': '연 금리',
   'd1.rateNote': '기록 우대 {d}%p 적용',
+  'd1.rateCalc': '기준 {base}% + 가산 {spread}%p − 기록 우대 {d}%p',
+  'd1.rateSrc': '수은채 유통수익률 기준',
   'd1.basis': '이렇게 계산했어요',
   'd1.b1': '재직 {m}개월',
   'd1.b1s': '사장님이 확인해 준 기간',

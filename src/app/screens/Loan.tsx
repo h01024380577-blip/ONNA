@@ -4,7 +4,7 @@ import { Icon } from '../Icon'
 import { Logo } from '../Logo'
 import { NavBar } from './Remit'
 import { FX } from '../../mock/fx'
-import { LOAN, loanOffer, monthlyPayment, totalRepay } from '../../mock/loan'
+import { LOAN, benchmark, loanOffer, monthlyPayment, totalRepay } from '../../mock/loan'
 
 /** 신용 이력 충족 여부 — 페르소나 잔여 개월이 0이거나 데모 토글이 켜진 경우 */
 export function useCreditReady() {
@@ -42,6 +42,10 @@ export function D1() {
             <span className="v" style={{ color: 'var(--app-primary)' }}>
               {offer.rate}%<small style={{ color: 'var(--app-ok)', fontWeight: 600 }}>{t('d1.rateNote', { d: offer.discount })}</small>
             </span></div>
+          <p style={{ marginTop: 8, fontSize: 12.5 }}>
+            {t('d1.rateCalc', { base: offer.base, spread: offer.spread, d: offer.discount })}
+            {benchmark.live && <> · {t('d1.rateSrc')} {benchmark.asOf}</>}
+          </p>
         </div>
 
         <div className="card">
@@ -73,8 +77,8 @@ export function D1() {
 /* D2 — 금액·기간 선택. 월 상환액과 생활비 여유를 즉시 보여 준다 */
 export function D2() {
   const { state, dispatch, p, t, krw, local } = useApp()
-  const offer = loanOffer(p, state.sessionRemits)
   const { amount, months } = state.loanDraft
+  const offer = loanOffer(p, state.sessionRemits, months)
   const monthly = amount > 0 ? monthlyPayment(amount, months, offer.rate) : 0
   const over = amount > offer.limit
   // 월급에서 자동이체·상환을 뺀 뒤 남는 생활비
@@ -138,7 +142,7 @@ export function D2() {
 /* D3 — 확정 시트(지문) → 실행 후 같은 화면이 완료 상태로 전환 */
 export function D3() {
   const { state, dispatch, p, t, krw } = useApp()
-  const offer = loanOffer(p, state.sessionRemits)
+  const offer = loanOffer(p, state.sessionRemits, state.loanDraft.months)
   const [bio, setBio] = useState(false)
   const loan = state.loan
 

@@ -33,7 +33,7 @@ async function fromKoreaexim(): Promise<{ rates: Record<string, number>; asOf: s
     const ymd = d.toISOString().slice(0, 10).replace(/-/g, '')
     try {
       const r = await fetch(
-        `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${key}&searchdate=${ymd}&data=AP01`,
+        `https://oapi.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=${key}&searchdate=${ymd}&data=AP01`,
         { signal: AbortSignal.timeout(5000) },
       )
       if (!r.ok) continue

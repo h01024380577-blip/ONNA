@@ -222,6 +222,8 @@ const vi = {
   'd1.limit': 'Hạn mức tối đa',
   'd1.rate': 'Lãi suất năm',
   'd1.rateNote': 'Ưu đãi theo hồ sơ {d}%p',
+  'd1.rateCalc': 'Cơ sở {base}% + biên {spread}%p − ưu đãi hồ sơ {d}%p',
+  'd1.rateSrc': 'Tham chiếu: lợi suất trái phiếu',
   'd1.basis': 'Cách tính như sau',
   'd1.b1': 'Làm việc {m} tháng',
   'd1.b1s': 'Được ông chủ xác nhận',

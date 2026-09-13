@@ -222,6 +222,8 @@ const en = {
   'd1.limit': 'Maximum available',
   'd1.rate': 'Annual rate',
   'd1.rateNote': 'Record discount {d}%p applied',
+  'd1.rateCalc': 'Base {base}% + spread {spread}%p − record discount {d}%p',
+  'd1.rateSrc': 'Benchmark: policy bank bond yield',
   'd1.basis': 'How this was calculated',
   'd1.b1': '{m} months employed',
   'd1.b1s': 'Confirmed by your boss',

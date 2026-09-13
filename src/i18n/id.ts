@@ -222,6 +222,8 @@ const id = {
   'd1.limit': 'Maksimal tersedia',
   'd1.rate': 'Bunga per tahun',
   'd1.rateNote': 'Diskon catatan {d}%p',
+  'd1.rateCalc': 'Dasar {base}% + margin {spread}%p − diskon catatan {d}%p',
+  'd1.rateSrc': 'Acuan: imbal hasil obligasi',
   'd1.basis': 'Begini cara hitungnya',
   'd1.b1': 'Kerja {m} bulan',
   'd1.b1s': 'Dikonfirmasi bos Anda',

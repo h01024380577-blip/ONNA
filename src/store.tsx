@@ -112,7 +112,7 @@ export function reducer(s: AppState, a: Action): AppState {
       }
 
     case 'LOAN_EXECUTE': {
-      const offer = loanOffer(p, s.sessionRemits)
+      const offer = loanOffer(p, s.sessionRemits, s.loanDraft.months)
       const amount = Math.min(s.loanDraft.amount, offer.limit)
       const monthly = monthlyPayment(amount, s.loanDraft.months, offer.rate)
       let st: AppState = {

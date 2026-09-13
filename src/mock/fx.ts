@@ -1,5 +1,7 @@
-import type { Currency, Quote } from '../types'
+import type { Currency, PastKey, PastPoint, Quote } from '../types'
 import { apiUrl } from '../lib/api'
+
+export type { PastKey, PastPoint }
 
 // GET /fx/quote 목 — 은행 고시 환율 + 3개월 평균 (RM-3: 숫자는 API 값, 문장만 템플릿)
 interface FxInfo {
@@ -16,13 +18,6 @@ interface FxInfo {
   /** 과거 시세 — 채팅에서 "지난주엔 얼마였어요?"에 답하는 근거.
      /api/fx가 실값을 채워 주기 전에는 비어 있고, 그때는 에이전트가 답하지 않는다. */
   past?: Partial<Record<PastKey, PastPoint>>
-}
-
-export type PastKey = 'weekAgo' | 'monthAgo'
-export interface PastPoint {
-  date: string // YYYY-MM-DD
-  rate: number
-  rateText: string
 }
 
 export const FX: Record<Currency, FxInfo> = {

@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 
 /* iM뱅크 × ONNA 로딩 화면 — 파트너십 락업.
    iM뱅크 로고는 공식 화이트 버전 자산을 그대로 사용한다 (임의 재현 금지) */
-export function Splash({ onDone, ms = 2200 }: { onDone: () => void; ms?: number }) {
+/* ms에는 마지막 400ms 페이드아웃(.splash.out의 CSS transition)이 포함된다.
+   페이드는 CSS와 맞춰 400ms 고정하고 앞의 노출 시간만 줄인다. */
+export function Splash({ onDone, ms = 1760 }: { onDone: () => void; ms?: number }) {
   const [leaving, setLeaving] = useState(false)
 
   useEffect(() => {

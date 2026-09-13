@@ -1,5 +1,8 @@
 /* ============ ONNA MVP 시뮬레이터 ============ */
 :root {
+  /* 세이프에어리어 — 기본은 실제 기기 값, 데스크톱 기기 프레임(.device)이 덮어쓴다 */
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
   --desk: #101619;
   --desk-2: #161e22;
   --desk-line: #243036;
@@ -99,48 +102,43 @@ button { font: inherit; cursor: pointer; color: inherit; }
 .devBtn:hover { background: rgba(16,180,145,.18); }
 .devBtn:disabled { opacity: .35; cursor: default; }
 .devBtn.subtle { border-color: var(--desk-line); background: transparent; color: var(--desk-muted); }
-.metric { display: flex; justify-content: space-between; font-size: 12.5px; padding: 5px 0; border-bottom: 1px dashed rgba(255,255,255,.07); }
-.metric .k { color: var(--desk-muted); }
-.metric .v { font-family: var(--mono); font-size: 12px; }
-
-.traceBox {
-  border-top: 1px solid var(--desk-line); height: 260px; flex: none;
-  display: flex; flex-direction: column; min-height: 0;
+/* ---------- iPhone 17 Pro 기기 프레임 (데스크톱 스테이지) ----------
+   화면을 실기와 같은 402×874pt로 두고, .device가 세이프에어리어까지 iOS 값으로
+   덮어쓴다. 그래서 앱은 데스크톱에서도 iOS와 완전히 같은 레이아웃으로 그려진다. */
+.deviceWrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.device {
+  --sat: 59px; --sab: 34px; /* iPhone 17 Pro 세이프에어리어 */
+  width: 426px; height: 898px; flex: none; padding: 12px;
+  background: linear-gradient(155deg, #3c4348, #14181a 55%, #2b3235);
+  border-radius: 67px;
+  box-shadow: 0 40px 90px rgba(0,0,0,.55), inset 0 0 0 1.5px rgba(255,255,255,.1);
 }
-.traceBox .traceHead {
-  display: flex; align-items: center; gap: 8px; padding: 8px 18px;
-  font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--desk-muted);
+.deviceScreen {
+  position: relative; width: 402px; height: 874px;
+  border-radius: 55px; overflow: hidden; background: #000;
 }
-.traceHead .dotLive { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); animation: blink 1.6s infinite; }
-@keyframes blink { 50% { opacity: .25; } }
-.traceLog { flex: 1; overflow: auto; padding: 0 18px 14px; font-family: var(--mono); font-size: 11px; line-height: 1.7; }
-.traceLog .tr { display: flex; gap: 8px; align-items: baseline; }
-.traceLog .tt { color: #55666d; flex: none; }
-.traceLog .actor { flex: none; padding: 0 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
-.actor.orchestrator { background: rgba(16,180,145,.18); color: #4fd8b8; }
-.actor.remit-agent { background: rgba(232,150,15,.18); color: #f0b45a; }
-.actor.compliance-agent { background: rgba(240,120,120,.15); color: #f09a9a; }
-.actor.rules-engine { background: rgba(120,160,240,.15); color: #9ab8f0; }
-.actor.bank-core { background: rgba(255,255,255,.1); color: #c8d2d6; }
-.actor.record-svc { background: rgba(190,140,240,.15); color: #c9a6ee; }
-.actor.app { background: rgba(255,255,255,.06); color: #8fa1a8; }
-.traceLog .msg { color: #b7c4c9; word-break: break-all; }
-
-/* ---------- phone ---------- */
-.phoneWrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.phone {
-  width: 396px; height: 826px; flex: none;
-  background: linear-gradient(160deg, #2a3438, #141a1d 60%);
-  border-radius: 54px; padding: 11px;
-  box-shadow: 0 40px 90px rgba(0,0,0,.55), inset 0 0 0 1.5px rgba(255,255,255,.09);
-  position: relative;
+/* 다이내믹 아일랜드 — 시뮬레이터 실측(122×37pt, 상단 14pt, 가운데) */
+.dynIsland {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+  width: 122px; height: 37px; border-radius: 19px; background: #000; z-index: 60;
 }
-@media (max-height: 960px) { .phoneWrap { transform: scale(.86); } }
-@media (max-height: 830px) { .phoneWrap { transform: scale(.74); } }
-.phone::after {
-  content: ''; position: absolute; top: 22px; left: 50%; transform: translateX(-50%);
-  width: 112px; height: 30px; border-radius: 18px; background: #0a0d0e; z-index: 40;
+.iosStatus {
+  position: absolute; top: 0; left: 0; right: 0; height: 59px; z-index: 55;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px 0 40px; pointer-events: none;
+  font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: #000;
 }
+.device.onDark .iosStatus { color: #fff; }
+.iosIcons { display: flex; align-items: center; gap: 6px; }
+.homeBar {
+  position: absolute; bottom: 9px; left: 50%; transform: translateX(-50%);
+  width: 144px; height: 5px; border-radius: 3px; background: rgba(0,0,0,.82); z-index: 60;
+}
+.device.onDark .homeBar { background: rgba(255,255,255,.85); }
+/* 노트북 화면에서도 기기가 통째로 보이게 */
+@media (max-height: 1030px) { .deviceWrap { transform: scale(.88); } }
+@media (max-height: 920px) { .deviceWrap { transform: scale(.78); } }
+@media (max-height: 830px) { .deviceWrap { transform: scale(.69); } }
 .screen {
   position: relative; width: 100%; height: 100%;
   border-radius: 44px; overflow: hidden;
@@ -185,13 +183,6 @@ button { font: inherit; cursor: pointer; color: inherit; }
   --app-hold-tint: #332813;
 }
 .screen[data-lang='ne'] { line-height: 1.6; }
-
-.statusbar {
-  height: 52px; flex: none; display: flex; align-items: flex-end; justify-content: space-between;
-  padding: 0 30px 6px; font-size: 13.5px; font-weight: 600; color: var(--app-ink);
-}
-.statusbar .sig { letter-spacing: 2px; font-size: 11px; opacity: .8; }
-.statusbar.onDark { color: #fff; }
 
 .topbar { position: relative; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 4px 10px 0; }
 .topbar button {
@@ -686,12 +677,12 @@ button.item:active { background: var(--app-primary-tint); }
 .chatSheet {
   margin-top: auto; width: 100%; height: 76%;
   background: var(--app-bg); border-radius: 22px 22px 0 0;
-  padding: 14px 16px calc(12px + env(safe-area-inset-bottom));
+  padding: 14px 16px calc(12px + var(--sab));
   display: flex; flex-direction: column; animation: sheetUp .25s ease-out;
 }
 .docSheet {
   margin-top: auto; width: 100%; background: var(--app-bg);
-  border-radius: 22px 22px 0 0; padding: 14px 16px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0; padding: 14px 16px calc(16px + var(--sab));
   animation: sheetUp .25s ease-out;
 }
 .docSheet .cam { margin: 12px 0 12px; }
@@ -708,8 +699,9 @@ button.item:active { background: var(--app-primary-tint); }
 .bubble.typing i:nth-child(2) { animation-delay: .18s; }
 .bubble.typing i:nth-child(3) { animation-delay: .36s; }
 @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
-.chatChips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 10px; }
-.chatChips::-webkit-scrollbar { display: none; }
+/* 가로 스크롤이면 마지막 칩이 화면 끝에서 글자째 잘려 보인다(스크롤바도 숨겨 놔서
+   더 안 보인다). 칩은 3개뿐이니 줄바꿈으로 전부 드러낸다. */
+.chatChips { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0 10px; }
 .chatChips button { flex: none; border: 1px solid var(--app-line); background: var(--app-card); color: var(--app-ink); border-radius: 999px; padding: 8px 13px; font-size: 12.5px; font-weight: 600; font-family: inherit; }
 .chatChips button:active { background: var(--app-agent-tint); }
 .chatInputRow { display: flex; gap: 8px; }
@@ -721,8 +713,8 @@ button.item:active { background: var(--app-primary-tint); }
 .chatInputRow input::placeholder { color: var(--app-muted); }
 .sendBtn { width: 46px; height: 46px; flex: none; border: none; border-radius: 50%; background: var(--app-agent); color: #fff; display: flex; align-items: center; justify-content: center; }
 
-/* keypad */
-.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+/* keypad — 하단 고정 영역(.appFoot) 안에 산다 */
+.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0 0 12px; }
 .keypad button {
   background: var(--app-card); border: 1px solid var(--app-line); border-radius: 12px;
   text-align: center; padding: 13px 0; font-size: 19px; font-weight: 600; color: var(--app-ink); font-family: inherit;
@@ -887,22 +879,22 @@ button.item:active { background: var(--app-primary-tint); }
 .screen.frameless { border-radius: 0; width: 100%; height: 100%; font-size: 16px; }
 .screen.frameless .bioOverlay,
 .screen.frameless .micSheetBack { border-radius: 0; }
-.safeTop { flex: none; height: env(safe-area-inset-top); }
-.screen.frameless .appFoot { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
-.screen.frameless .navbar { height: calc(66px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom); }
-.screen.frameless .lock { padding-top: calc(env(safe-area-inset-top) + 44px); }
-.screen.frameless .micSheet { padding-bottom: calc(22px + env(safe-area-inset-bottom)); }
-.screen.frameless .sheet { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+.safeTop { flex: none; height: var(--sat); }
+.screen.frameless .appFoot { padding-bottom: calc(18px + var(--sab)); }
+.screen.frameless .navbar { height: calc(66px + var(--sab)); padding-bottom: var(--sab); }
+.screen.frameless .lock { padding-top: calc(var(--sat) + 44px); }
+.screen.frameless .micSheet { padding-bottom: calc(22px + var(--sab)); }
+.screen.frameless .sheet { padding-bottom: calc(18px + var(--sab)); }
 
 .mobileDesk {
   position: absolute; inset: 0; overflow: auto;
-  padding: calc(env(safe-area-inset-top) + 16px) 12px calc(24px + env(safe-area-inset-bottom));
+  padding: calc(var(--sat) + 16px) 12px calc(24px + var(--sab));
   display: flex; align-items: flex-start; justify-content: center;
 }
 .mobileDesk .deskCard { width: 100%; max-width: 100%; }
 
 .fab {
-  position: fixed; top: calc(env(safe-area-inset-top) + 6px); right: 10px; z-index: 60;
+  position: fixed; top: calc(var(--sat) + 6px); right: 10px; z-index: 60;
   width: 40px; height: 40px; border: 0; background: none; padding: 0;
   display: flex; align-items: center; justify-content: center;
   color: #97a4a0; /* 회색 톱니바퀴만 — 배경 원 없음 */
@@ -911,7 +903,7 @@ button.item:active { background: var(--app-primary-tint); }
 .devSheetBack { position: fixed; inset: 0; z-index: 70; background: rgba(8,12,11,.55); display: flex; }
 .devSheet {
   margin-top: auto; width: 100%; background: var(--desk-2); color: var(--desk-ink);
-  border-radius: 22px 22px 0 0; padding: 18px 18px calc(22px + env(safe-area-inset-bottom));
+  border-radius: 22px 22px 0 0; padding: 18px 18px calc(22px + var(--sab));
   max-height: 78vh; overflow: auto; animation: sheetUp .25s ease-out;
 }
 .devSheet h3 {

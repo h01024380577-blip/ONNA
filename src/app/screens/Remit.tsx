@@ -231,6 +231,10 @@ export function B2() {
           <Logo size={20} />
           <span>{t('b1.why', { rate: fx.rateText, pct: fxAdvantagePct(p.currency), floor: krw(state.livingFloor) })}</span>
         </div>
+      </div>
+      {/* 키패드는 본문 스크롤 밖에 둔다 — 안에 두면 언어에 따라 안내 문구가 길어질 때
+          마지막 줄(000·0·⌫)이 CTA에 가려 잘린다 */}
+      <div className="appFoot">
         <div className="keypad">
           {['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'].map((k) => (
             <button key={k} onClick={() => key(k)} aria-label={k === '⌫' ? t('common.back') : undefined}>
@@ -238,8 +242,6 @@ export function B2() {
             </button>
           ))}
         </div>
-      </div>
-      <div className="appFoot">
         <button className="btn" disabled={amount <= 0} onClick={() => dispatch({ type: 'NAV', screen: 'B3' })}>
           {t('b2.apply')}<Icon name="chevron" size={17} style={{ marginLeft: 4 }} />
         </button>

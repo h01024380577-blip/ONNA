@@ -4,7 +4,7 @@ import { makeT, fmtLocal } from '../i18n'
 import { FX } from '../mock/fx'
 
 /* B6 가족 수령 페이지 — RM-12: 수취인 언어, 앱 불필요, 만료형 링크, 개인정보 최소 */
-export function FamilyPhone({ frameless = false }: { frameless?: boolean }) {
+export function FamilyPhone() {
   const { state } = useStore()
   const p = PERSONAS[state.personaId]
   const t = makeT(p.lang) // 항상 수취인 언어
@@ -14,10 +14,8 @@ export function FamilyPhone({ frameless = false }: { frameless?: boolean }) {
     new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
 
   const inner = (
-      <div className={`screen ${frameless ? 'frameless' : ''}`} data-lang={p.lang}>
-        {frameless
-          ? <div className="safeTop" />
-          : <div className="statusbar"><span>20:03</span><span className="sig">●●● ▲ ▮</span></div>}
+      <div className="screen frameless" data-lang={p.lang}>
+        <div className="safeTop" />
         <div className="web">
           <div className="urlbar">onna.imbank.co.kr/r/{tx ? tx.id.slice(-5) : '—'}</div>
           {tx && tx.status !== 'cancelled' ? (
@@ -52,5 +50,5 @@ export function FamilyPhone({ frameless = false }: { frameless?: boolean }) {
       </div>
   )
 
-  return frameless ? inner : <div className="phone">{inner}</div>
+  return inner
 }

@@ -49,8 +49,9 @@ type ChatMsg = {
   action?: { label: string; screen?: Screen; amount?: number; escalate?: boolean }
 }
 
-/* 근로자 앱 폰 — 시뮬레이터의 메인 스테이지. frameless=네이티브(iOS) 풀스크린 */
-export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boolean; frameless?: boolean }) {
+/* 근로자 앱 화면 — 항상 실기(iOS)와 같은 풀스크린 레이아웃으로 그린다.
+   데스크톱에서는 DeviceFrame이 기기 셸을 씌워 같은 모습을 만든다. */
+export function WorkerPhone({ idFailMode }: { idFailMode: boolean }) {
   const { state, dispatch, p, t, krw, local } = useApp()
   const fx = FX[p.currency]
   // 앱 진입 로딩 화면 — 폰 화면 안에서만 표시. 'onna:splash' 이벤트로 재생
@@ -189,10 +190,8 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
   const isLock = s === 'B0'
 
   const inner = (
-      <div className={`screen ${state.dark ? 'dark' : ''} ${frameless ? 'frameless' : ''}`} data-lang={state.lang ?? ''}>
-        {!isLock && (frameless
-          ? <div className="safeTop" />
-          : <div className="statusbar"><span>9:41</span><span className="sig">●●● ▲ ▮</span></div>)}
+      <div className={`screen frameless ${state.dark ? 'dark' : ''}`} data-lang={state.lang ?? ''}>
+        {!isLock && <div className="safeTop" />}
 
         {TOP_NAV[s] && (
           <div className="topbar">
@@ -272,5 +271,5 @@ export function WorkerPhone({ idFailMode, frameless = false }: { idFailMode: boo
       </div>
   )
 
-  return frameless ? inner : <div className="phone">{inner}</div>
+  return inner
 }

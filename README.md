@@ -2,7 +2,7 @@
   <img src="docs/images/hero.jpg" alt="ONNA 화면 — 급여 입금 분석, 근거가 보이는 송금 제안, 채팅 업무 분업, 서류 사진 설명" width="100%">
 </p>
 
-<h1 align="center"><img src="public/onna-logo.png" alt="" width="48" align="center">&nbsp;ONNA</h1>
+<h1 align="center"><img src="public/onna-logo.png" alt="" width="40" align="top">&nbsp;ONNA</h1>
 
 <p align="center">
   <b>외국인 근로자의 월급날에 먼저 말을 거는 금융 에이전트</b><br>

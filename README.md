@@ -1,4 +1,8 @@
 <p align="center">
+  <img src="public/onna-logo.png" alt="ONNA 로고" width="140">
+</p>
+
+<p align="center">
   <img src="docs/images/hero.jpg" alt="ONNA 화면 — 급여 입금 분석, 근거가 보이는 송금 제안, 채팅 업무 분업, 서류 사진 설명" width="100%">
 </p>
 

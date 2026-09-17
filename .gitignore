@@ -1,0 +1,19 @@
+node_modules
+dist
+.DS_Store
+.vercel
+
+# 비밀키 — 절대 커밋 금지
+.env
+.env.*
+!.env.example
+
+# Capacitor 네이티브(iOS) 산출물 — 웹 배포에는 불필요
+ios/App/Pods
+ios/App/App/public
+
+# 안내 자료 원본 — 저장소가 공개이므로 올리지 않는다 (README·예시만 커밋)
+guides/*
+!guides/README.md
+!guides/sources.example.json
+guides-test/

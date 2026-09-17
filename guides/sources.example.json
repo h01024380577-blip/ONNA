@@ -1,0 +1,11 @@
+[
+  {
+    "file": "gas-bill-guide.md",
+    "id": "gas_bill_guide",
+    "title": "도시가스 요금 고지서 읽는 법",
+    "source": "제공 자료 이름 (발행 기관)",
+    "url": "https://example.org/원문-주소",
+    "kinds": ["utility_bill"],
+    "lang": "ko"
+  }
+]

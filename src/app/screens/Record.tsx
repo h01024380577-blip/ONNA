@@ -4,8 +4,8 @@ import { Icon } from '../Icon'
 import { LoanEntry } from './Loan'
 import { NavBar } from './Remit'
 import { DocRunCard } from '../DocRunCard'
-import { startDocRun } from '../../agent/useDocAgent'
-import { downscale } from '../../lib/image'
+import { failDocRun, startDocRun } from '../../agent/useDocAgent'
+import { downscale, readDoc } from '../../lib/image'
 import { Ledger, groupByMonth } from '../Ledger'
 
 /* C1 내 기록 — CR-1/2: 요약 + 진행 바 + 월별 타임라인 + 검증됨 배지 */
@@ -125,9 +125,9 @@ export function Help() {
     e.target.value = '' // 같은 파일 재선택 허용
     if (!f || busy) return
     try {
-      startDocRun(dispatch, await downscale(f), 'help')
+      startDocRun(dispatch, await readDoc(f), 'help')
     } catch {
-      /* 읽을 수 없는 파일 — 아무것도 시작하지 않는다 */
+      failDocRun(dispatch, 'help') // 읽을 수 없거나 너무 큰 파일 — 실패 안내를 보여 준다
     }
   }
 
@@ -169,7 +169,7 @@ export function Help() {
         )}
 
         {/* 파일 올려서 물어보기 — 같은 서류 에이전트로 */}
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+        <input ref={fileRef} type="file" accept="image/*,application/pdf,.pdf" hidden onChange={onFile} />
         <button className="card helpCard" style={{ width: '100%', textAlign: 'left', cursor: 'pointer' }}
           disabled={busy} onClick={() => fileRef.current?.click()}>
           <div className="ico"><Icon name="doc" size={20} /></div>

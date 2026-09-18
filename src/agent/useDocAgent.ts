@@ -18,6 +18,13 @@ export function startDocRun(dispatch: (a: Action) => void, image: string, origin
   dispatch({ type: 'DOC_START', runId, origin, question: question?.slice(0, 300) })
 }
 
+/** 파일을 읽지 못했거나 너무 클 때 — 아무 일도 없던 것처럼 두지 않고 실패 안내 카드를 보여 준다 */
+export function failDocRun(dispatch: (a: Action) => void, origin: DocRun['origin']) {
+  const runId = Date.now()
+  dispatch({ type: 'DOC_START', runId, origin })
+  dispatch({ type: 'DOC_ERROR', runId })
+}
+
 /** 서류에서 읽은 것만으로 만든 답 — 검색·검증이 실패했을 때 */
 export function ocrOnlyAnswer(ocr: DocOcr): DocAnswer {
   return {

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { initialState, reducer } from './store'
 import { assessCredit } from './agent/credit'
+import { failDocRun } from './agent/useDocAgent'
 import { PERSONAS } from './mock/personas'
 import type { AppState } from './types'
 
@@ -247,5 +248,13 @@ describe('서류 에이전트 상태', () => {
   it('실패', () => {
     const s = run(initialState('minh', 'home'), { type: 'DOC_START', runId: 10, origin: 'help' }, { type: 'DOC_ERROR', runId: 10 })
     expect(s.docRun?.status).toBe('error')
+  })
+
+  it('읽지 못한 파일(너무 큰 PDF 등)은 조용히 넘기지 않고 실패 카드로 보인다 — 채팅에도 카드가 남는다', () => {
+    const actions: Parameters<typeof reducer>[1][] = []
+    failDocRun((a) => actions.push(a), 'chat')
+    const s = run(initialState('minh', 'home'), ...actions)
+    expect(s.docRun).toMatchObject({ origin: 'chat', status: 'error' })
+    expect(s.chat.at(-1)).toMatchObject({ kind: 'doc', runId: s.docRun?.runId })
   })
 })

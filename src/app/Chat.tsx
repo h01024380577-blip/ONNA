@@ -5,8 +5,8 @@ import { Logo } from './Logo'
 import { StepRow, ThinkingCard } from './AgentSteps'
 import { RemitProposalCard } from './RemitCard'
 import { DocRunCard } from './DocRunCard'
-import { startDocRun } from '../agent/useDocAgent'
-import { downscale } from '../lib/image'
+import { failDocRun, startDocRun } from '../agent/useDocAgent'
+import { readDoc } from '../lib/image'
 import type { ChatAction, ChatItem } from '../types'
 
 /* 에이전트 채팅 — 사용자 질문(chat) → 오케스트레이터(의도 분석 → Task 분업) →
@@ -44,10 +44,10 @@ export function ChatSheet({ onClose }: { onClose: () => void }) {
     e.target.value = ''
     if (!f || docBusy) return
     try {
-      startDocRun(dispatch, await downscale(f), 'chat', draft.trim() || lastQuestion())
+      startDocRun(dispatch, await readDoc(f), 'chat', draft.trim() || lastQuestion())
       setDraft('')
     } catch {
-      /* 읽을 수 없는 파일 */
+      failDocRun(dispatch, 'chat') // 읽을 수 없거나 너무 큰 파일 — 실패 안내를 보여 준다
     }
   }
 
@@ -79,7 +79,7 @@ export function ChatSheet({ onClose }: { onClose: () => void }) {
             <button key={sug} disabled={typing} onClick={() => ask(sug)}>{sug}</button>
           ))}
         </div>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+        <input ref={fileRef} type="file" accept="image/*,application/pdf,.pdf" hidden onChange={onFile} />
         <div className="chatInputRow">
           <button className="attachBtn" aria-label={t('doc.attach')} disabled={docBusy} onClick={() => fileRef.current?.click()}>
             <Icon name="camera" size={19} />

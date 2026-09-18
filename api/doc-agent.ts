@@ -3,17 +3,19 @@ import {
 } from './_lib'
 import { embed, getChunks, matchChunks, type GuideChunk } from './_guides'
 import { ACTIONS_BY_KIND, DOC_KINDS, KIND_KO, cleanAnswer, cleanChecks, toKind, type DocKind } from '../src/agent/docRules'
+import { MAX_DOC_DATA_URL, docInputPart } from '../src/agent/docInput'
 import { softenKo } from '../src/agent/koRegister'
 
 export const config = { runtime: 'edge' }
 
 /* 서류 에이전트 — 단계마다 요청이 따로 온다(클라이언트 useDocAgent 가 순서를 잡는다).
-     ocr    : 사진 → 종류·주요 글자·항목·기본 요약            (vision)
+     ocr    : 사진·PDF → 종류·주요 글자·항목·기본 요약        (vision)
      search : 질의 임베딩 → 문서 Vector DB(pgvector) top-5     (RAG)
      draft  : 근거 달린 초안 + 검증 질문                       (CoVe 1)
-     verify : 초안을 보지 않고 원본 사진·자료로 질문에 답함      (CoVe 2, vision)
+     verify : 초안을 보지 않고 원본 사진·PDF·자료로 질문에 답함  (CoVe 2, vision)
      revise : 어긋난 항목만 고침 — 어긋났을 때만 불린다          (CoVe 3)
-   프라이버시: 사진·원문은 메모리에서만 처리하고 저장·로그하지 않는다. */
+   입력 형식은 src/agent/docInput.ts — 사진은 image_url, PDF 는 file 파트로 넘긴다.
+   프라이버시: 사진·PDF·원문은 메모리에서만 처리하고 저장·로그하지 않는다. */
 
 const LANG_NAME: Record<string, string> = {
   ko: 'Korean', en: 'English', id: 'Indonesian', vi: 'Vietnamese', ne: 'Nepali',
@@ -91,8 +93,9 @@ const textOf = (d: unknown) =>
   parseJson<Body>((d as { choices?: Array<{ message?: { content?: string } }> })?.choices?.[0]?.message?.content ?? '')
 
 /* ---------- ① OCR ---------- */
-const OCR_SYSTEM = `You read a photo of a Korean document for a migrant worker.
+const OCR_SYSTEM = `You read a photo or a PDF of a Korean document for a migrant worker.
 STEP 1 — Read it (OCR). Extract only what is actually printed.
+  If a PDF has several pages, read the page with the amounts, dates and payment details first.
 STEP 2 — Classify it as one of: ${DOC_KINDS.join(', ')}.
   utility_bill = gas, electricity, water, phone or health-insurance bill. bank_doc = bank statement,
   transfer receipt, balance certificate. payslip = wage statement. contract = employment contract.
@@ -110,10 +113,18 @@ OUTPUT strict JSON only:
  "summary":"…","koPhrase":"…","confidence":"high|medium|low"}
 At most 6 items in "fields".`
 
+/** 서류 입력(사진·PDF data URL) 검사 — 모델에 넘길 content 파트 또는 오류 응답 */
+function docInput(b: Body): { part: NonNullable<ReturnType<typeof docInputPart>> } | { error: Response } {
+  const image = s(b.image, MAX_DOC_DATA_URL + 1)
+  const part = docInputPart(image)
+  if (!part) return { error: bad('image must be an image or PDF data URL') }
+  if (image.length > MAX_DOC_DATA_URL) return { error: bad('file too large (max ~3MB)', 413) }
+  return { part }
+}
+
 async function stepOcr(b: Body, lang: string) {
-  const image = s(b.image, 5_000_000)
-  if (!image.startsWith('data:image/')) return bad('image must be a data URL')
-  if (image.length > 4_000_000) return bad('image too large (max ~3MB)', 413)
+  const input = docInput(b)
+  if ('error' in input) return input.error
 
   const d = await openai(
     {
@@ -127,7 +138,7 @@ async function stepOcr(b: Body, lang: string) {
           role: 'user',
           content: [
             { type: 'text', text: `REQUESTED LANGUAGE: ${LANG_NAME[lang]}` },
-            { type: 'image_url', image_url: { url: image, detail: 'high' } },
+            input.part,
           ],
         },
       ],
@@ -278,7 +289,7 @@ async function stepDraft(b: Body, lang: string) {
 }
 
 /* ---------- ③-2 독립 검증 ---------- */
-const VERIFY_SYSTEM = `You are a careful checker. Answer each question using ONLY the document image and the PASSAGES.
+const VERIFY_SYSTEM = `You are a careful checker. Answer each question using ONLY the document (photo or PDF) and the PASSAGES.
 You have not seen any earlier explanation. Do not guess.
 - type "value": copy the value exactly as printed (with its unit), or null if it is not printed.
   Never calculate, subtract or combine numbers — if the exact answer is not printed, answer null.
@@ -288,8 +299,8 @@ Answer in the language of the question. FORBIDDEN WORDS: 거절, 차단, 위반,
 OUTPUT strict JSON only: {"answers":[{"id":"c1","answer":"…"|null,"verdict":"yes|no|unknown","cite":"…"}]}`
 
 async function stepVerify(b: Body) {
-  const image = s(b.image, 5_000_000)
-  if (!image.startsWith('data:image/')) return bad('image must be a data URL')
+  const input = docInput(b)
+  if ('error' in input) return input.error
   const checks = (Array.isArray(b.checks) ? b.checks : [])
     .slice(0, 4)
     .map((c) => ({
@@ -316,7 +327,7 @@ async function stepVerify(b: Body) {
           role: 'user',
           content: [
             { type: 'text', text: `PASSAGES:\n${passages}\n\nQUESTIONS:\n${JSON.stringify(checks)}` },
-            { type: 'image_url', image_url: { url: image, detail: 'high' } },
+            input.part,
           ],
         },
       ],

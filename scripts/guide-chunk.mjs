@@ -13,6 +13,8 @@ function hardSplit(s, size, overlap) {
 export function chunkText(text, { size = 700, overlap = 100 } = {}) {
   const clean = String(text)
     .replace(/\r\n/g, '\n')
+    // PDF 에서 뽑은 글에 NUL 이 섞여 온다(실측: 건강보험공단 안내서) — Postgres text 에 넣을 수 없다
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, ' ')
     .replace(/[ \t]+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()

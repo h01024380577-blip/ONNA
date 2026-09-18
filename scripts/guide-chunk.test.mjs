@@ -35,6 +35,12 @@ describe('chunkText', () => {
     for (const c of out.slice(1)) expect(c.startsWith('가') || c.startsWith('라') || c.startsWith('사') || c.startsWith('차') || c.startsWith('파')).toBe(true)
   })
 
+  it('NUL 등 제어 문자는 공백으로 바꾼다 — Postgres text 에 0x00 을 넣을 수 없다', () => {
+    const out = chunkText('Ⅱ.\u0000건강보험료 산정\u0007 안내\n\n둘째\u0000 문단.')
+    expect(out.join('')).not.toMatch(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/)
+    expect(out[0]).toContain('Ⅱ. 건강보험료 산정  안내')
+  })
+
   it('아주 긴 한 문장도 잘라 낸다', () => {
     const out = chunkText('다'.repeat(1500), { size: 500, overlap: 50 })
     expect(out.length).toBeGreaterThanOrEqual(3)

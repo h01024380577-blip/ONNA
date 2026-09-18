@@ -26,7 +26,7 @@ export function A0() {
     <>
       <div className="appBody">
         <LogoHero />
-        <div className="brandTitle">이리 <i className="wmk">ONNA</i></div>
+        <div className="brandTitle">일로 <i className="wmk">ONNA</i></div>
         <p className="lead" style={{ fontSize: 16 }}>{t('a0.nation')}</p>
         <div className="list">
           {NATIONS.map((n) => (

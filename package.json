@@ -31,5 +31,9 @@
     "unpdf": "^1.8.1",
     "vite": "^6.0.5",
     "vitest": "^5.0.0"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "fsevents": true
   }
 }
